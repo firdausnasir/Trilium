@@ -15,7 +15,6 @@ on:
 
 env:
   GHCR_REGISTRY: ghcr.io
-  DOCKERHUB_REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository}}
   TEST_TAG: ${{ github.repository}}:test
 
@@ -109,9 +108,7 @@ jobs:
 
   build:
     name: Build Docker images
-    # Only the main repository publishes. merge declares needs: build, so it skips with
-    # this job; test_docker stays unguarded because it uses no secrets.
-    if: ${{ github.repository == vars.REPO_MAIN }}
+    if: ${{ github.repository == 'firdausnasir/Trilium' }}
     strategy:
       fail-fast: false
       matrix:
@@ -121,12 +118,6 @@ jobs:
             image: ubuntu-latest
           - dockerfile: Dockerfile
             platform: linux/arm64
-            image: ubuntu-24.04-arm
-          - dockerfile: Dockerfile.legacy
-            platform: linux/arm/v7
-            image: ubuntu-24.04-arm
-          - dockerfile: Dockerfile.legacy
-            platform: linux/arm/v8
             image: ubuntu-24.04-arm
     runs-on: ${{ matrix.image }}
     needs:
@@ -244,13 +235,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.DOCKERHUB_REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -278,7 +262,6 @@ jobs:
         working-directory: /tmp/digests
         run: |
           GHCR_IMAGE="${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}"
-          DOCKERHUB_IMAGE="${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}"
 
           # Build -m flags for crane index append from digest files
           MANIFEST_ARGS=""
@@ -286,34 +269,22 @@ jobs:
             MANIFEST_ARGS="${MANIFEST_ARGS} -m ${GHCR_IMAGE}@sha256:${d}"
           done
 
-          # Create multi-arch manifest for each tag from metadata, plus copy to DockerHub
+          # Create a multi-arch manifest for each metadata tag.
           while IFS= read -r TAG; do
             echo "Creating manifest: ${TAG}"
             crane index append ${MANIFEST_ARGS} -t "${TAG}"
-
-            SUFFIX="${TAG#*:}"
-            echo "Copying to DockerHub: ${DOCKERHUB_IMAGE}:${SUFFIX}"
-            crane copy "${TAG}" "${DOCKERHUB_IMAGE}:${SUFFIX}"
           done <<< "${{ steps.meta.outputs.tags }}"
 
-          # For stable releases (tags without hyphens), also create stable + latest
+          # Main and version tags are available through the conventional default tag.
           REF_NAME="${GITHUB_REF#refs/tags/}"
-          if [[ "${GITHUB_REF}" == refs/tags/* && ! "${REF_NAME}" =~ - ]]; then
-            echo "Creating stable tags..."
-            crane index append ${MANIFEST_ARGS} -t "${GHCR_IMAGE}:stable"
-            crane copy "${GHCR_IMAGE}:stable" "${DOCKERHUB_IMAGE}:stable"
-
-            echo "Creating latest tags..."
-            crane copy "${GHCR_IMAGE}:stable" "${GHCR_IMAGE}:latest"
-            crane copy "${GHCR_IMAGE}:latest" "${DOCKERHUB_IMAGE}:latest"
+          REF_NAME="${REF_NAME#refs/heads/}"
+          if [[ "${GITHUB_REF}" == "refs/heads/main" || "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "Creating latest tag..."
+            crane copy "${GHCR_IMAGE}:${REF_NAME}" "${GHCR_IMAGE}:latest"
           fi
 
       - name: Inspect manifests
         run: |
           REF_NAME="${GITHUB_REF#refs/heads/}"
           REF_NAME="${REF_NAME#refs/tags/}"
-          echo "=== GHCR ==="
           crane manifest "${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${REF_NAME}"
-          echo ""
-          echo "=== DockerHub ==="
-          crane manifest "${{ env.DOCKERHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${REF_NAME}"
