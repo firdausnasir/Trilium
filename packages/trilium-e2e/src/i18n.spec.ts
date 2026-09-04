@@ -11,7 +11,10 @@ test("Displays translation on desktop", async ({ page, context }) => {
     const app = new App(page, context);
     await app.goto();
 
-    await expect(page.locator("#left-pane .quick-search input")).toHaveAttribute("placeholder", "Quick search");
+    await expect(page.locator(".knowledge-studio-workspace-leading .quick-search input")).toHaveAttribute(
+        "placeholder",
+        "Quick search"
+    );
 });
 
 test("Displays translation on mobile", async ({ page, context }) => {
