@@ -1,9 +1,21 @@
-import { isImageAttachmentRole, isSvgMime, NOTE_TYPE_IMAGE_ATTACHMENTS } from "@triliumnext/commons";
-import { search as searchService, SearchContext, utils } from "@triliumnext/core";
+import {
+    isImageAttachmentRole,
+    isSvgMime,
+    NOTE_TYPE_IMAGE_ATTACHMENTS,
+} from "@triliumnext/commons";
+import {
+    i18n,
+    search as searchService,
+    SearchContext,
+    utils,
+} from "@triliumnext/core";
 import type { NextFunction, Request, Response, Router } from "express";
 import safeCompare from "safe-compare";
 
-import { getDefaultTemplatePath, renderNoteContent } from "./content_renderer.js";
+import {
+    getDefaultTemplatePath,
+    renderNoteContent,
+} from "./content_renderer.js";
 import type SAttachment from "./shaca/entities/sattachment.js";
 import type SNote from "./shaca/entities/snote.js";
 import shaca from "./shaca/shaca.js";
@@ -12,7 +24,9 @@ import { isShareDbReady } from "./sql.js";
 
 function assertShareDbReady(_req: Request, res: Response, next: NextFunction) {
     if (!isShareDbReady()) {
-        res.status(503).send("The application is still initializing. Please try again in a moment.");
+        res.status(503).send(
+            "The application is still initializing. Please try again in a moment.",
+        );
         return;
     }
 
@@ -26,14 +40,23 @@ function addNoIndexHeader(note: SNote, res: Response) {
 }
 
 function requestCredentials(res: Response) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="User Visible Realm", charset="UTF-8"').sendStatus(401);
+    res.setHeader(
+        "WWW-Authenticate",
+        'Basic realm="User Visible Realm", charset="UTF-8"',
+    ).sendStatus(401);
 }
 
-function checkAttachmentAccess(attachmentId: string, req: Request, res: Response) {
+function checkAttachmentAccess(
+    attachmentId: string,
+    req: Request,
+    res: Response,
+) {
     const attachment = shaca.getAttachment(attachmentId);
 
     if (!attachment) {
-        res.status(404).json({ message: `Attachment '${attachmentId}' not found.` });
+        res.status(404).json({
+            message: `Attachment '${attachmentId}' not found.`,
+        });
 
         return false;
     }
@@ -63,7 +86,9 @@ function checkNoteAccess(noteId: string, req: Request, res: Response) {
     }
 
     if (noteId === "_share" && !shaca.shareIndexEnabled) {
-        res.status(403).json({ message: `Accessing share index is forbidden.` });
+        res.status(403).json({
+            message: `Accessing share index is forbidden.`,
+        });
 
         return false;
     }
@@ -96,7 +121,9 @@ function hasCredentialAccess(note: SNote, req: Request) {
     const buffer = Buffer.from(base64Str, "base64");
     const authString = buffer.toString("utf-8");
 
-    return credentials.some((credentialLabel) => safeCompare(authString, credentialLabel.value));
+    return credentials.some((credentialLabel) =>
+        safeCompare(authString, credentialLabel.value),
+    );
 }
 
 // Returns true when the note reached via `notePathArray` is actually visible in
@@ -106,7 +133,10 @@ function hasCredentialAccess(note: SNote, req: Request) {
 // cannot enumerate notes the navigation tree deliberately hides. Exported for
 // tests: a clone's best note path can bypass the share subtree entirely, which
 // is impractical to stage through the full search stack.
-export function isVisibleInShareTree(ancestorNoteId: string, notePathArray: string[]) {
+export function isVisibleInShareTree(
+    ancestorNoteId: string,
+    notePathArray: string[],
+) {
     const startIndex = notePathArray.indexOf(ancestorNoteId);
 
     if (startIndex < 0) {
@@ -115,9 +145,17 @@ export function isVisibleInShareTree(ancestorNoteId: string, notePathArray: stri
 
     for (let i = startIndex + 1; i < notePathArray.length; i++) {
         const childNote = shaca.notes[notePathArray[i]];
-        const branch = shaca.getBranchFromChildAndParent(notePathArray[i], notePathArray[i - 1]);
+        const branch = shaca.getBranchFromChildAndParent(
+            notePathArray[i],
+            notePathArray[i - 1],
+        );
 
-        if (!childNote || !branch || branch.isHidden || childNote.isLabelTruthy("shareHiddenFromTree")) {
+        if (
+            !childNote ||
+            !branch ||
+            branch.isHidden ||
+            childNote.isLabelTruthy("shareHiddenFromTree")
+        ) {
             return false;
         }
     }
@@ -154,11 +192,14 @@ function rejectProtected(note: SNote, res: Response, message: string) {
     return true;
 }
 
-function renderImageAttachment(image: SNote, res: Response, attachmentName: string) {
+function renderImageAttachment(
+    image: SNote,
+    res: Response,
+    attachmentName: string,
+) {
     let svgString = "<svg/>";
     const attachment = image.getAttachmentByTitle(attachmentName);
     if (!attachment) {
-
         return;
     }
     const content = attachment.getContent();
@@ -168,12 +209,13 @@ function renderImageAttachment(image: SNote, res: Response, attachmentName: stri
         // backwards compatibility, before attachments, the SVG was stored in the main note content as a separate key
         const possibleSvgContent = image.getJsonContentSafely();
 
-        const contentSvg = (typeof possibleSvgContent === "object"
-            && possibleSvgContent !== null
-            && "svg" in possibleSvgContent
-            && typeof possibleSvgContent.svg === "string")
-            ? possibleSvgContent.svg
-            : null;
+        const contentSvg =
+            typeof possibleSvgContent === "object" &&
+            possibleSvgContent !== null &&
+            "svg" in possibleSvgContent &&
+            typeof possibleSvgContent.svg === "string"
+                ? possibleSvgContent.svg
+                : null;
 
         if (contentSvg) {
             svgString = contentSvg;
@@ -191,7 +233,11 @@ function renderImageAttachment(image: SNote, res: Response, attachmentName: stri
 function render404(res: Response) {
     res.status(404);
     const shareThemePath = getDefaultTemplatePath("404");
-    res.render(shareThemePath);
+    const locale = i18n.getCurrentLocale();
+    res.render(shareThemePath, {
+        locale: locale.id,
+        direction: locale.rtl ? "rtl" : "ltr",
+    });
 }
 
 function register(router: Router) {
@@ -214,7 +260,10 @@ function register(router: Router) {
 
         addNoIndexHeader(note, res);
 
-        if (note.isLabelTruthy("shareRaw") || typeof req.query.raw !== "undefined") {
+        if (
+            note.isLabelTruthy("shareRaw") ||
+            typeof req.query.raw !== "undefined"
+        ) {
             // A protected note is shown as a placeholder by renderNoteContent()
             // below, but the raw branch streams note.getContent() directly, so it
             // must refuse protected notes (GHSA-xmv9-3v98-7gq8).
@@ -231,7 +280,10 @@ function register(router: Router) {
             // so the instance owner is deliberately opting in to serve their own scriptable
             // content. Restricting it would break legitimate self-contained HTML pages.
             if (isSvgMime(note.mime)) {
-                res.setHeader("Content-Security-Policy", utils.SVG_CONTENT_SECURITY_POLICY);
+                res.setHeader(
+                    "Content-Security-Policy",
+                    utils.SVG_CONTENT_SECURITY_POLICY,
+                );
                 res.setHeader("X-Content-Type-Options", "nosniff");
             }
 
@@ -240,7 +292,11 @@ function register(router: Router) {
             return;
         }
 
-        res.send(renderNoteContent(note, (includedNote) => hasCredentialAccess(includedNote, req)));
+        res.send(
+            renderNoteContent(note, (includedNote) =>
+                hasCredentialAccess(includedNote, req),
+            ),
+        );
     }
 
     router.get("/share/", (req, res) => {
@@ -293,9 +349,16 @@ function register(router: Router) {
 
         addNoIndexHeader(note, res);
 
-        const filename = utils.formatDownloadTitle(note.title, note.type, note.mime);
+        const filename = utils.formatDownloadTitle(
+            note.title,
+            note.type,
+            note.mime,
+        );
 
-        res.setHeader("Content-Disposition", utils.getContentDisposition(filename));
+        res.setHeader(
+            "Content-Disposition",
+            utils.getContentDisposition(filename),
+        );
 
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.setHeader("Content-Type", note.mime);
@@ -318,11 +381,17 @@ function register(router: Router) {
             if (isSvgMime(image.mime)) {
                 // SVG images require sanitization to prevent stored XSS
                 const content = image.getContent();
-                const svgContent = typeof content === "string" ? content : new TextDecoder().decode(content ?? new Uint8Array());
+                const svgContent =
+                    typeof content === "string"
+                        ? content
+                        : new TextDecoder().decode(content ?? new Uint8Array());
                 const sanitized = utils.sanitizeSvg(svgContent);
                 res.set("Content-Type", "image/svg+xml");
                 res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-                res.set("Content-Security-Policy", utils.SVG_CONTENT_SECURITY_POLICY);
+                res.set(
+                    "Content-Security-Policy",
+                    utils.SVG_CONTENT_SECURITY_POLICY,
+                );
                 res.set("X-Content-Type-Options", "nosniff");
                 res.send(sanitized);
             } else {
@@ -330,61 +399,110 @@ function register(router: Router) {
                 res.send(image.getContent());
             }
         } else if (image.type === "canvas") {
-            renderImageAttachment(image, res, NOTE_TYPE_IMAGE_ATTACHMENTS.canvas);
+            renderImageAttachment(
+                image,
+                res,
+                NOTE_TYPE_IMAGE_ATTACHMENTS.canvas,
+            );
         } else if (image.type === "mermaid") {
-            renderImageAttachment(image, res, NOTE_TYPE_IMAGE_ATTACHMENTS.mermaid);
+            renderImageAttachment(
+                image,
+                res,
+                NOTE_TYPE_IMAGE_ATTACHMENTS.mermaid,
+            );
         } else if (image.type === "mindMap") {
-            renderImageAttachment(image, res, NOTE_TYPE_IMAGE_ATTACHMENTS.mindMap);
+            renderImageAttachment(
+                image,
+                res,
+                NOTE_TYPE_IMAGE_ATTACHMENTS.mindMap,
+            );
         } else {
-            res.status(400).json({ message: "Requested note is not a shareable image" });
+            res.status(400).json({
+                message: "Requested note is not a shareable image",
+            });
         }
     });
 
     // :filename is not used by trilium, but instead used for "save as" to assign a human-readable filename
-    router.get("/share/api/attachments/:attachmentId/image/:filename", (req, res) => {
-        shacaLoader.ensureLoad();
+    router.get(
+        "/share/api/attachments/:attachmentId/image/:filename",
+        (req, res) => {
+            shacaLoader.ensureLoad();
 
-        let attachment: SAttachment | boolean;
+            let attachment: SAttachment | boolean;
 
-        if (!(attachment = checkAttachmentAccess(req.params.attachmentId, req, res))) {
-            return;
-        }
-
-        if (isImageAttachmentRole(attachment.role)) {
-            addNoIndexHeader(attachment.note, res);
-            if (isSvgMime(attachment.mime)) {
-                // SVG attachments require sanitization to prevent stored XSS
-                const content = attachment.getContent();
-                const svgContent = typeof content === "string" ? content : new TextDecoder().decode(content ?? new Uint8Array());
-                const sanitized = utils.sanitizeSvg(svgContent);
-                res.set("Content-Type", "image/svg+xml");
-                res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-                res.set("Content-Security-Policy", utils.SVG_CONTENT_SECURITY_POLICY);
-                res.set("X-Content-Type-Options", "nosniff");
-                res.send(sanitized);
-            } else {
-                res.set("Content-Type", attachment.mime);
-                res.send(attachment.getContent());
+            if (
+                !(attachment = checkAttachmentAccess(
+                    req.params.attachmentId,
+                    req,
+                    res,
+                ))
+            ) {
+                return;
             }
-        } else {
-            res.status(400).json({ message: "Requested attachment is not a shareable image" });
-        }
-    });
+
+            if (isImageAttachmentRole(attachment.role)) {
+                addNoIndexHeader(attachment.note, res);
+                if (isSvgMime(attachment.mime)) {
+                    // SVG attachments require sanitization to prevent stored XSS
+                    const content = attachment.getContent();
+                    const svgContent =
+                        typeof content === "string"
+                            ? content
+                            : new TextDecoder().decode(
+                                  content ?? new Uint8Array(),
+                              );
+                    const sanitized = utils.sanitizeSvg(svgContent);
+                    res.set("Content-Type", "image/svg+xml");
+                    res.set(
+                        "Cache-Control",
+                        "no-cache, no-store, must-revalidate",
+                    );
+                    res.set(
+                        "Content-Security-Policy",
+                        utils.SVG_CONTENT_SECURITY_POLICY,
+                    );
+                    res.set("X-Content-Type-Options", "nosniff");
+                    res.send(sanitized);
+                } else {
+                    res.set("Content-Type", attachment.mime);
+                    res.send(attachment.getContent());
+                }
+            } else {
+                res.status(400).json({
+                    message: "Requested attachment is not a shareable image",
+                });
+            }
+        },
+    );
 
     router.get("/share/api/attachments/:attachmentId/download", (req, res) => {
         shacaLoader.ensureLoad();
 
         let attachment: SAttachment | boolean;
 
-        if (!(attachment = checkAttachmentAccess(req.params.attachmentId, req, res))) {
+        if (
+            !(attachment = checkAttachmentAccess(
+                req.params.attachmentId,
+                req,
+                res,
+            ))
+        ) {
             return;
         }
 
         addNoIndexHeader(attachment.note, res);
 
-        const filename = utils.formatDownloadTitle(attachment.title, null, attachment.mime);
+        const filename = utils.formatDownloadTitle(
+            attachment.title,
+            null,
+            attachment.mime,
+        );
 
-        res.setHeader("Content-Disposition", utils.getContentDisposition(filename));
+        res.setHeader(
+            "Content-Disposition",
+            utils.getContentDisposition(filename),
+        );
 
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.setHeader("Content-Type", attachment.mime);
@@ -417,7 +535,9 @@ function register(router: Router) {
         const ancestorNoteId = req.query.ancestorNoteId ?? "_share";
 
         if (typeof ancestorNoteId !== "string") {
-            res.status(400).json({ message: "'ancestorNoteId' parameter is mandatory." });
+            res.status(400).json({
+                message: "'ancestorNoteId' parameter is mandatory.",
+            });
             return;
         }
 
@@ -429,28 +549,44 @@ function register(router: Router) {
         const { search } = req.query;
 
         if (typeof search !== "string" || !search?.trim()) {
-            res.status(400).json({ message: "'search' parameter is mandatory." });
+            res.status(400).json({
+                message: "'search' parameter is mandatory.",
+            });
             return;
         }
 
         const searchContext = new SearchContext({ ancestorNoteId });
-        const searchResults = searchService.findResultsWithQuery(search, searchContext);
+        const searchResults = searchService.findResultsWithQuery(
+            search,
+            searchContext,
+        );
         const filteredResults = searchResults
             // Apply the same per-note authorization as the direct content routes:
             // keep only results the caller may access and that are visible in the tree.
             .filter((sr) => {
                 const fullNote = shaca.notes[sr.noteId];
 
-                return fullNote
-                    && hasCredentialAccess(fullNote, req)
-                    && isVisibleInShareTree(ancestorNoteId, sr.notePathArray);
+                return (
+                    fullNote &&
+                    hasCredentialAccess(fullNote, req) &&
+                    isVisibleInShareTree(ancestorNoteId, sr.notePathArray)
+                );
             })
             .map((sr) => {
                 const fullNote = shaca.notes[sr.noteId];
                 const startIndex = sr.notePathArray.indexOf(ancestorNoteId);
-                const localPathArray = sr.notePathArray.slice(startIndex + 1).filter((id) => shaca.notes[id]);
-                const pathTitle = localPathArray.map((id) => shaca.notes[id].title).join(" / ");
-                return { id: fullNote.shareId, title: fullNote.title, score: sr.score, path: pathTitle };
+                const localPathArray = sr.notePathArray
+                    .slice(startIndex + 1)
+                    .filter((id) => shaca.notes[id]);
+                const pathTitle = localPathArray
+                    .map((id) => shaca.notes[id].title)
+                    .join(" / ");
+                return {
+                    id: fullNote.shareId,
+                    title: fullNote.title,
+                    score: sr.score,
+                    path: pathTitle,
+                };
             });
 
         res.json({ results: filteredResults });
@@ -458,5 +594,5 @@ function register(router: Router) {
 }
 
 export default {
-    register
+    register,
 };

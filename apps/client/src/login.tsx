@@ -31,37 +31,52 @@ export function App() {
 
     if (config?.ssoEnabled) {
         return (
-            <div class="setup-container login-container oidc">
-                <SetupPage className="login" title={t("login.heading")} illustration={illustration} error={error} errorId={0}>
-                    {/* A <button>, not an <a>, on purpose: link.ts installs a global anchor-click
-                        handler that preventDefaults every link and only navigates note/http links,
-                        so an <a> to a plain server route gets swallowed. A button sidesteps it and
-                        just navigates to the route that starts the OpenID round-trip. */}
-                    <Button
-                        className="oidc-login"
-                        onClick={() => { window.location.href = "/authenticate"; }}
-                        text={(
-                            <>
-                                {config.ssoIssuerIcon
-                                    ? <img src={config.ssoIssuerIcon} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                                    : null}
-                                {t("login.sign_in_with_sso", { ssoIssuerName: config.ssoIssuerName ?? "" })}
-                            </>
-                        )}
-                    />
-                </SetupPage>
+            <div class="setup-container knowledge-studio-entry-container login-container oidc">
+                <EntrySignal />
+                <div class="setup-stage login-stage">
+                    <SetupPage className="login" title={t("login.heading")} illustration={illustration} error={error} errorId={0}>
+                        {/* A <button>, not an <a>, on purpose: link.ts installs a global anchor-click
+                            handler that preventDefaults every link and only navigates note/http links,
+                            so an <a> to a plain server route gets swallowed. A button sidesteps it and
+                            just navigates to the route that starts the OpenID round-trip. */}
+                        <Button
+                            className="oidc-login"
+                            onClick={() => { window.location.href = "/authenticate"; }}
+                            text={(
+                                <>
+                                    {config.ssoIssuerIcon
+                                        ? <img src={config.ssoIssuerIcon} alt="" onError={(e) => { e.currentTarget.hidden = true; }} />
+                                        : null}
+                                    {t("login.sign_in_with_sso", { ssoIssuerName: config.ssoIssuerName ?? "" })}
+                                </>
+                            )}
+                        />
+                    </SetupPage>
+                </div>
             </div>
         );
     }
 
     return (
-        <div class="setup-container login-container">
-            <PasswordLogin
-                illustration={illustration}
-                totpEnabled={config?.totpEnabled ?? false}
-                initialError={error}
-            />
+        <div class="setup-container knowledge-studio-entry-container login-container">
+            <EntrySignal />
+            <div class="setup-stage login-stage">
+                <PasswordLogin
+                    illustration={illustration}
+                    totpEnabled={config?.totpEnabled ?? false}
+                    initialError={error}
+                />
+            </div>
         </div>
+    );
+}
+
+function EntrySignal() {
+    return (
+        <aside class="entry-signal" aria-hidden="true">
+            <img src={logo} alt="" />
+            <div class="entry-signal-lines"><span /><span /><span /></div>
+        </aside>
     );
 }
 

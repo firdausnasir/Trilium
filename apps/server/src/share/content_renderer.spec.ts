@@ -1,11 +1,19 @@
 import { trimIndentation } from "@triliumnext/commons";
-import { sanitize, utils } from "@triliumnext/core";
+import { i18n, sanitize, utils } from "@triliumnext/core";
 import ejs from "ejs";
 import { parse } from "node-html-parser";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { buildShareNote, buildShareNotes } from "../test/shaca_mocking.js";
-import { getContent, getDefaultTemplatePath, readTemplate, renderCode, renderNoteContent, type Result, shouldSyntaxHighlight } from "./content_renderer.js";
+import {
+    getContent,
+    getDefaultTemplatePath,
+    readTemplate,
+    renderCode,
+    renderNoteContent,
+    type Result,
+    shouldSyntaxHighlight,
+} from "./content_renderer.js";
 import type SNote from "./shaca/entities/snote.js";
 import shaca from "./shaca/shaca.js";
 import shareRoot from "./share_root.js";
@@ -15,15 +23,17 @@ describe("content_renderer", () => {
         vi.mock("../becca/becca_loader.js", () => ({
             default: {
                 load: vi.fn(),
-                loaded: Promise.resolve()
-            }
+                loaded: Promise.resolve(),
+            },
         }));
     });
 
     it("Reports protected notes not being renderable", () => {
         const note = buildShareNote({ isProtected: true });
         const result = getContent(note);
-        expect(result.content).toStrictEqual("<p>Protected note cannot be displayed</p>");
+        expect(result.content).toStrictEqual(
+            "<p>Protected note cannot be displayed</p>",
+        );
     });
 
     describe("Text note", () => {
@@ -45,7 +55,7 @@ describe("content_renderer", () => {
         it("renders included notes", () => {
             buildShareNotes([
                 { id: "subnote1", content: `<p>Foo</p><div>Bar</div>` },
-                { id: "subnote2", content: `<strong>Baz</strong>` }
+                { id: "subnote2", content: `<strong>Baz</strong>` },
             ]);
             const note = buildShareNote({
                 id: "note1",
@@ -54,7 +64,7 @@ describe("content_renderer", () => {
                     <section class="include-note" data-note-id="subnote1" data-box-size="small">&nbsp;</section>
                     <section class="include-note" data-note-id="subnote2" data-box-size="small">&nbsp;</section>
                     <p>After</p>
-                `
+                `,
             });
             const result = getContent(note);
             expect(result.content).toStrictEqual(trimIndentation`\
@@ -66,18 +76,23 @@ describe("content_renderer", () => {
         });
 
         it("renders only the first level of nested includes on the share view (nested include becomes a reference link)", () => {
-            buildShareNote({ id: "nestC2", title: "Note C", content: "<p>C body</p>" });
+            buildShareNote({
+                id: "nestC2",
+                title: "Note C",
+                content: "<p>C body</p>",
+            });
             buildShareNote({
                 id: "nestB2",
                 title: "Note B",
-                content: `<p>B body</p><section class="include-note" data-note-id="nestC2" data-box-size="medium">&nbsp;</section>`
+                content: `<p>B body</p><section class="include-note" data-note-id="nestC2" data-box-size="medium">&nbsp;</section>`,
             });
             const noteA = buildShareNote({
                 id: "nestA2",
-                content: `<p>A body</p><section class="include-note" data-note-id="nestB2" data-box-size="medium">&nbsp;</section>`
+                content: `<p>A body</p><section class="include-note" data-note-id="nestB2" data-box-size="medium">&nbsp;</section>`,
             });
             const result = getContent(noteA);
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             // First level (B) expanded; second level (C) replaced with a reference link, not expanded.
             expect(result.content).toContain("B body");
             expect(result.content).not.toContain("C body");
@@ -86,32 +101,48 @@ describe("content_renderer", () => {
         });
 
         it("expands nested includes recursively when exporting (expandNestedIncludes)", () => {
-            buildShareNote({ id: "expC", title: "Note C", content: "<p>C body</p>" });
+            buildShareNote({
+                id: "expC",
+                title: "Note C",
+                content: "<p>C body</p>",
+            });
             buildShareNote({
                 id: "expB",
-                content: `<p>B body</p><section class="include-note" data-note-id="expC" data-box-size="medium">&nbsp;</section>`
+                content: `<p>B body</p><section class="include-note" data-note-id="expC" data-box-size="medium">&nbsp;</section>`,
             });
             const noteA = buildShareNote({
                 id: "expA",
-                content: `<p>A body</p><section class="include-note" data-note-id="expB" data-box-size="medium">&nbsp;</section>`
+                content: `<p>A body</p><section class="include-note" data-note-id="expB" data-box-size="medium">&nbsp;</section>`,
             });
             const result = getContent(noteA, { expandNestedIncludes: true });
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             expect(result.content).toContain("B body");
             expect(result.content).toContain("C body");
             expect(result.content).not.toContain("reference-link");
         });
 
         it("expands a note shared across sibling branches in each branch when exporting (not a false cycle)", () => {
-            buildShareNote({ id: "dagD", title: "Note D", content: "<p>D body</p>" });
-            buildShareNote({ id: "dagB", content: `<p>B body</p><section class="include-note" data-note-id="dagD" data-box-size="medium">&nbsp;</section>` });
-            buildShareNote({ id: "dagC", content: `<p>C body</p><section class="include-note" data-note-id="dagD" data-box-size="medium">&nbsp;</section>` });
+            buildShareNote({
+                id: "dagD",
+                title: "Note D",
+                content: "<p>D body</p>",
+            });
+            buildShareNote({
+                id: "dagB",
+                content: `<p>B body</p><section class="include-note" data-note-id="dagD" data-box-size="medium">&nbsp;</section>`,
+            });
+            buildShareNote({
+                id: "dagC",
+                content: `<p>C body</p><section class="include-note" data-note-id="dagD" data-box-size="medium">&nbsp;</section>`,
+            });
             const noteA = buildShareNote({
                 id: "dagA",
-                content: `<section class="include-note" data-note-id="dagB" data-box-size="medium">&nbsp;</section><section class="include-note" data-note-id="dagC" data-box-size="medium">&nbsp;</section>`
+                content: `<section class="include-note" data-note-id="dagB" data-box-size="medium">&nbsp;</section><section class="include-note" data-note-id="dagC" data-box-size="medium">&nbsp;</section>`,
             });
             const result = getContent(noteA, { expandNestedIncludes: true });
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             // Diamond A→{B,C}→D: D is not a cycle, so it expands in both branches.
             expect((result.content.match(/D body/g) ?? []).length).toBe(2);
             expect(result.content).not.toContain("reference-link");
@@ -120,14 +151,15 @@ describe("content_renderer", () => {
         it("does not loop on a circular include chain when expanding recursively", () => {
             buildShareNote({
                 id: "cycB",
-                content: `<p>B body</p><section class="include-note" data-note-id="cycA" data-box-size="medium">&nbsp;</section>`
+                content: `<p>B body</p><section class="include-note" data-note-id="cycA" data-box-size="medium">&nbsp;</section>`,
             });
             const noteA = buildShareNote({
                 id: "cycA",
-                content: `<p>A body</p><section class="include-note" data-note-id="cycB" data-box-size="medium">&nbsp;</section>`
+                content: `<p>A body</p><section class="include-note" data-note-id="cycB" data-box-size="medium">&nbsp;</section>`,
             });
             const result = getContent(noteA, { expandNestedIncludes: true });
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             // A expands B; B's re-include of A is broken by the cycle guard (reference link), no hang.
             expect(result.content).toContain("A body");
             expect(result.content).toContain("B body");
@@ -139,15 +171,18 @@ describe("content_renderer", () => {
                 id: "credSecret",
                 title: "Quarterly figures",
                 content: "<p>secret body</p>",
-                "#shareCredentials": "viewer:secretpass"
+                "#shareCredentials": "viewer:secretpass",
             });
             const host = buildShareNote({
                 id: "credHost",
-                content: `<p>public</p><section class="include-note" data-note-id="credSecret" data-box-size="medium">&nbsp;</section>`
+                content: `<p>public</p><section class="include-note" data-note-id="credSecret" data-box-size="medium">&nbsp;</section>`,
             });
 
-            const denied = getContent(host, { canAccessInclude: (note) => note.getCredentials().length === 0 });
-            if (typeof denied.content !== "string") throw new Error("expected string content");
+            const denied = getContent(host, {
+                canAccessInclude: (note) => note.getCredentials().length === 0,
+            });
+            if (typeof denied.content !== "string")
+                throw new Error("expected string content");
             expect(denied.content).toContain("public");
             expect(denied.content).not.toContain("secret body");
             // The title is withheld as well: an included note need not be visible in the share tree.
@@ -155,7 +190,8 @@ describe("content_renderer", () => {
             expect(denied.content).toContain("include-note-forbidden");
 
             const allowed = getContent(host, { canAccessInclude: () => true });
-            if (typeof allowed.content !== "string") throw new Error("expected string content");
+            if (typeof allowed.content !== "string")
+                throw new Error("expected string content");
             expect(allowed.content).toContain("secret body");
         });
 
@@ -164,30 +200,36 @@ describe("content_renderer", () => {
                 id: "credDeep",
                 title: "Deep secret",
                 content: "<p>deep body</p>",
-                "#shareCredentials": "viewer:secretpass"
+                "#shareCredentials": "viewer:secretpass",
             });
             buildShareNote({
                 id: "credMiddle",
-                content: `<p>middle body</p><section class="include-note" data-note-id="credDeep" data-box-size="medium">&nbsp;</section>`
+                content: `<p>middle body</p><section class="include-note" data-note-id="credDeep" data-box-size="medium">&nbsp;</section>`,
             });
             const host = buildShareNote({
                 id: "credOuter",
-                content: `<section class="include-note" data-note-id="credMiddle" data-box-size="medium">&nbsp;</section>`
+                content: `<section class="include-note" data-note-id="credMiddle" data-box-size="medium">&nbsp;</section>`,
             });
-            const canAccessInclude = (note: SNote) => note.getCredentials().length === 0;
+            const canAccessInclude = (note: SNote) =>
+                note.getCredentials().length === 0;
 
             // Live share view: the second level would degrade to a reference link, which must not
             // leak the protected note's title either.
             const shareView = getContent(host, { canAccessInclude });
-            if (typeof shareView.content !== "string") throw new Error("expected string content");
+            if (typeof shareView.content !== "string")
+                throw new Error("expected string content");
             expect(shareView.content).toContain("middle body");
             expect(shareView.content).not.toContain("deep body");
             expect(shareView.content).not.toContain("Deep secret");
             expect(shareView.content).not.toContain("reference-link");
 
             // Recursive expansion carries the check down with it.
-            const expanded = getContent(host, { expandNestedIncludes: true, canAccessInclude });
-            if (typeof expanded.content !== "string") throw new Error("expected string content");
+            const expanded = getContent(host, {
+                expandNestedIncludes: true,
+                canAccessInclude,
+            });
+            if (typeof expanded.content !== "string")
+                throw new Error("expected string content");
             expect(expanded.content).toContain("middle body");
             expect(expanded.content).not.toContain("deep body");
         });
@@ -197,30 +239,64 @@ describe("content_renderer", () => {
                 id: "credPageSecret",
                 title: "Page secret",
                 content: "<p>page secret body</p>",
-                "#shareCredentials": "viewer:secretpass"
+                "#shareCredentials": "viewer:secretpass",
             });
             const shareRootNote = buildShareNote({
                 id: shareRoot.SHARE_ROOT_NOTE_ID,
-                children: [{
-                    id: "credPageHost",
-                    content: `<p>page host body</p><section class="include-note" data-note-id="credPageSecret" data-box-size="medium">&nbsp;</section>`
-                }]
+                children: [
+                    {
+                        id: "credPageHost",
+                        content: `<p>page host body</p><section class="include-note" data-note-id="credPageSecret" data-box-size="medium">&nbsp;</section>`,
+                    },
+                ],
             });
             const host = shareRootNote.getChildNotes()[0];
 
-            const page = renderNoteContent(host, (note) => note.getCredentials().length === 0);
-            if (typeof page !== "string") throw new Error("expected string content");
+            const page = renderNoteContent(
+                host,
+                (note) => note.getCredentials().length === 0,
+            );
+            if (typeof page !== "string")
+                throw new Error("expected string content");
             expect(page).toContain("page host body");
             expect(page).not.toContain("page secret body");
+        });
+
+        it("sets the public document language and direction from the active locale", () => {
+            const localeSpy = vi
+                .spyOn(i18n, "getCurrentLocale")
+                .mockReturnValue({
+                    id: "ar",
+                    name: "Arabic",
+                    rtl: true,
+                });
+            const shareRootNote = buildShareNote({
+                id: shareRoot.SHARE_ROOT_NOTE_ID,
+                children: [{ id: "rtlPage", content: "<p>RTL page</p>" }],
+            });
+
+            try {
+                const page = renderNoteContent(
+                    shareRootNote.getChildNotes()[0],
+                );
+                if (typeof page !== "string")
+                    throw new Error("expected string content");
+                const html = parse(page).querySelector("html");
+                expect(html?.getAttribute("lang")).toBe("ar");
+                expect(html?.getAttribute("dir")).toBe("rtl");
+            } finally {
+                localeSpy.mockRestore();
+            }
         });
 
         it("leaves an include-note section untouched when the referenced note is missing", () => {
             const note = buildShareNote({
                 id: "missingRefHost",
-                content: `<p>host</p><section class="include-note" data-note-id="ghostNote" data-box-size="medium">&nbsp;</section>`
+                content: `<p>host</p><section class="include-note" data-note-id="ghostNote" data-box-size="medium">&nbsp;</section>`,
             });
             const result = getContent(note);
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             // The missing note is skipped: the section stays, nothing is expanded or reference-linked.
             expect(result.content).toContain("host");
             expect(result.content).toContain(`data-note-id="ghostNote"`);
@@ -230,11 +306,18 @@ describe("content_renderer", () => {
         it("renders an included large code note without hanging or re-parsing it as HTML (#9717)", () => {
             // ~2 MiB of angle-bracket-heavy code that previously exploded node-html-parser.
             const codeLine = `const x: Array<Map<string, List<number>>> = a < b && c > d; // <div>\n`;
-            const bigCode = codeLine.repeat(Math.ceil((2 * 1024 * 1024) / codeLine.length));
-            buildShareNote({ id: "bigcode", type: "code", mime: "application/javascript", content: bigCode });
+            const bigCode = codeLine.repeat(
+                Math.ceil((2 * 1024 * 1024) / codeLine.length),
+            );
+            buildShareNote({
+                id: "bigcode",
+                type: "code",
+                mime: "application/javascript",
+                content: bigCode,
+            });
             const note = buildShareNote({
                 id: "host",
-                content: `<p>Before</p><section class="include-note" data-note-id="bigcode" data-box-size="medium">&nbsp;</section><p>After</p>`
+                content: `<p>Before</p><section class="include-note" data-note-id="bigcode" data-box-size="medium">&nbsp;</section><p>After</p>`,
             });
 
             const start = Date.now();
@@ -244,7 +327,8 @@ describe("content_renderer", () => {
             // Generous budget: the pre-fix path was effectively unbounded, and CI runs this
             // under V8 coverage with several forked workers, where 2s was at the noise floor.
             expect(elapsed).toBeLessThan(15_000);
-            if (typeof result.content !== "string") throw new Error("expected string content");
+            if (typeof result.content !== "string")
+                throw new Error("expected string content");
             // The code is escaped, not re-parsed into markup, and not highlighted (over the limit).
             expect(result.content).toContain("&lt;Map&lt;string");
             expect(result.content).not.toContain("hljs");
@@ -265,7 +349,7 @@ describe("content_renderer", () => {
                     &lt;/BuilderRow&gt;
                     &lt;/t&gt;</code>
                     </pre>
-                `
+                `,
             });
             const result = getContent(note);
             expect(result.content).toStrictEqual(trimIndentation`\
@@ -294,7 +378,12 @@ describe("content_renderer", () => {
                 `;
                 const note = buildShareNote({
                     content,
-                    attachments: [ { id: "q14s2Id7V6pp", title: "5863845791835102555.mp4" } ]
+                    attachments: [
+                        {
+                            id: "q14s2Id7V6pp",
+                            title: "5863845791835102555.mp4",
+                        },
+                    ],
                 });
                 const result = getContent(note);
                 expect(result.content).toStrictEqual(trimIndentation`\
@@ -310,7 +399,7 @@ describe("content_renderer", () => {
                 buildShareNote({
                     id: "MSkxxCFbBsYP",
                     title: "Foo",
-                    isProtected: true
+                    isProtected: true,
                 });
                 const note = buildShareNote({
                     id: "note",
@@ -320,7 +409,7 @@ describe("content_renderer", () => {
                                 Foo
                             </a>
                         </p>
-                    `
+                    `,
                 });
                 const result = getContent(note);
                 expect(result.content).toStrictEqual(trimIndentation`\
@@ -339,17 +428,20 @@ describe("content_renderer", () => {
                                 Foo
                             </a>
                         </p>
-                    `
+                    `,
                 });
                 const result = getContent(note);
-                const content = (result.content as string).replaceAll(/\s/g, "");
+                const content = (result.content as string).replaceAll(
+                    /\s/g,
+                    "",
+                );
                 expect(content).toStrictEqual("<p>Foo</p>");
             });
 
             it("properly escapes note title", () => {
                 buildShareNote({
                     id: "MSkxxCFbBsYP",
-                    title: "The quick <strong>brown</strong> fox"
+                    title: "The quick <strong>brown</strong> fox",
                 });
                 const note = buildShareNote({
                     id: "note",
@@ -359,7 +451,7 @@ describe("content_renderer", () => {
                             Hi
                             </a>
                         </p>
-                    `
+                    `,
                 });
                 const result = getContent(note);
                 expect(result.content).toStrictEqual(trimIndentation`\
@@ -376,30 +468,36 @@ describe("content_renderer", () => {
 
         it("renders a card, showing the stored favicon beside the site name", () => {
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"`
-                    + ` data-title="A title" data-description="A description" data-site-name="Example"`
-                    + ` data-favicon="${FAVICON}" data-image="data:image/jpeg;base64,BBB"></section>`
+                content:
+                    `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"` +
+                    ` data-title="A title" data-description="A description" data-site-name="Example"` +
+                    ` data-favicon="${FAVICON}" data-image="data:image/jpeg;base64,BBB"></section>`,
             });
 
             const content = String(getContent(note).content);
-            expect(content).toContain(`<div class="link-embed-card-url">`
-                + `<img class="link-embed-mention-favicon" src="${FAVICON}" alt="" loading="lazy" width="16" height="16">`
-                + `<span>Example</span></div>`);
+            expect(content).toContain(
+                `<div class="link-embed-card-url">` +
+                    `<img class="link-embed-mention-favicon" src="${FAVICON}" alt="" loading="lazy" width="16" height="16">` +
+                    `<span>Example</span></div>`,
+            );
         });
 
         it("shows the site name alone when the site has no favicon", () => {
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph" data-title="A title"></section>`
+                content: `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph" data-title="A title"></section>`,
             });
 
             const content = String(getContent(note).content);
-            expect(content).toContain(`<div class="link-embed-card-url"><span>example.com</span></div>`);
+            expect(content).toContain(
+                `<div class="link-embed-card-url"><span>example.com</span></div>`,
+            );
         });
 
         it("renders a video as a click-to-play facade, without contacting YouTube", () => {
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"`
-                    + ` data-embed-type="youtube" data-title="A video" data-image="data:image/jpeg;base64,BBB"></section>`
+                content:
+                    `<section class="link-embed" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"` +
+                    ` data-embed-type="youtube" data-title="A video" data-image="data:image/jpeg;base64,BBB"></section>`,
             });
 
             const content = String(getContent(note).content);
@@ -407,8 +505,12 @@ describe("content_renderer", () => {
             // thumbnail already stored in the note. The theme's script swaps in the player on click.
             expect(content).not.toContain("<iframe");
             expect(content).not.toContain("youtube-nocookie.com");
-            expect(content).toContain(`<button type="button" class="link-embed-video-facade" data-video-id="dQw4w9WgXcQ"`);
-            expect(content).toContain(`<img class="link-embed-video-thumbnail" src="data:image/jpeg;base64,BBB"`);
+            expect(content).toContain(
+                `<button type="button" class="link-embed-video-facade" data-video-id="dQw4w9WgXcQ"`,
+            );
+            expect(content).toContain(
+                `<img class="link-embed-video-thumbnail" src="data:image/jpeg;base64,BBB"`,
+            );
         });
 
         it("neuters a hostile scheme in the stored URL, on a page served to anyone", () => {
@@ -416,26 +518,34 @@ describe("content_renderer", () => {
             // by import, ETAPI or sync can carry `data-url="javascript:…"`. It must not become a
             // live link on the public share page.
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="javascript:alert(document.cookie)" data-embed-type="opengraph" data-title="Evil"></section>`
-                    + `<p><span class="link-mention" data-url="javascript:alert(1)" data-title="Evil"></span></p>`
+                content:
+                    `<section class="link-embed" data-url="javascript:alert(document.cookie)" data-embed-type="opengraph" data-title="Evil"></section>` +
+                    `<p><span class="link-mention" data-url="javascript:alert(1)" data-title="Evil"></span></p>`,
             });
 
             const content = String(getContent(note).content);
             // The element keeps its inert data-url attribute — nothing reads it on the shared page —
             // but no href points at the payload.
             expect(content).not.toContain(`href="javascript:`);
-            expect(content).toContain(`<a class="link-embed-card" href="about:blank"`);
-            expect(content).toContain(`<a class="link-embed-mention" href="about:blank"`);
+            expect(content).toContain(
+                `<a class="link-embed-card" href="about:blank"`,
+            );
+            expect(content).toContain(
+                `<a class="link-embed-mention" href="about:blank"`,
+            );
         });
 
         it("keeps a stored attachment reference, which is served from this instance", () => {
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"`
-                    + ` data-title="A title" data-image="api/attachments/abc123/image/preview.png"></section>`
+                content:
+                    `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"` +
+                    ` data-title="A title" data-image="api/attachments/abc123/image/preview.png"></section>`,
             });
 
             const content = String(getContent(note).content);
-            expect(content).toContain(`<img class="link-embed-card-image" src="api/attachments/abc123/image/preview.png"`);
+            expect(content).toContain(
+                `<img class="link-embed-card-image" src="api/attachments/abc123/image/preview.png"`,
+            );
         });
 
         it("drops a remote favicon/image rather than have every visitor fetch it", () => {
@@ -445,13 +555,14 @@ describe("content_renderer", () => {
             // metadata pipeline only ever stores an inline image or an attachment, so a remote URL
             // is illegitimate by construction.
             const note = buildShareNote({
-                content: `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"`
-                    + ` data-title="A title" data-favicon="http://169.254.169.254/latest/meta-data/"`
-                    + ` data-image="https://tracker.test/pixel.gif"></section>`
-                    + `<section class="link-embed" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"`
-                    + ` data-embed-type="youtube" data-image="https://tracker.test/thumb.jpg"></section>`
-                    + `<p><span class="link-mention" data-url="https://example.com/page" data-title="A title"`
-                    + ` data-favicon="https://tracker.test/favicon.ico"></span></p>`
+                content:
+                    `<section class="link-embed" data-url="https://example.com/page" data-embed-type="opengraph"` +
+                    ` data-title="A title" data-favicon="http://169.254.169.254/latest/meta-data/"` +
+                    ` data-image="https://tracker.test/pixel.gif"></section>` +
+                    `<section class="link-embed" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"` +
+                    ` data-embed-type="youtube" data-image="https://tracker.test/thumb.jpg"></section>` +
+                    `<p><span class="link-mention" data-url="https://example.com/page" data-title="A title"` +
+                    ` data-favicon="https://tracker.test/favicon.ico"></span></p>`,
             });
 
             const content = String(getContent(note).content);
@@ -462,20 +573,28 @@ describe("content_renderer", () => {
             // Each sink degrades to what it already shows for a preview that has no such picture:
             // the card keeps a placeholder in the hole its cover would fill, the favicon simply goes.
             expect(content).not.toContain(`class="link-embed-mention-favicon"`);
-            expect(content).toContain(`<a class="link-embed-mention" href="https://example.com/page" target="_blank" rel="noopener noreferrer">`
-                + `<span class="link-embed-mention-title">A title</span></a>`);
-            expect(content).toContain(`<div class="link-embed-card-image-placeholder">`);
+            expect(content).toContain(
+                `<a class="link-embed-mention" href="https://example.com/page" target="_blank" rel="noopener noreferrer">` +
+                    `<span class="link-embed-mention-title">A title</span></a>`,
+            );
+            expect(content).toContain(
+                `<div class="link-embed-card-image-placeholder">`,
+            );
             expect(content).not.toContain(`class="link-embed-video-thumbnail"`);
         });
 
         it("renders an inline mention with the same favicon markup", () => {
             const note = buildShareNote({
-                content: `<p><span class="link-mention" data-url="https://example.com/page" data-title="A title" data-favicon="${FAVICON}"></span></p>`
+                content: `<p><span class="link-mention" data-url="https://example.com/page" data-title="A title" data-favicon="${FAVICON}"></span></p>`,
             });
 
             const content = String(getContent(note).content);
-            expect(content).toContain(`<img class="link-embed-mention-favicon" src="${FAVICON}" alt="" loading="lazy" width="16" height="16">`);
-            expect(content).toContain(`<span class="link-embed-mention-title">A title</span>`);
+            expect(content).toContain(
+                `<img class="link-embed-mention-favicon" src="${FAVICON}" alt="" loading="lazy" width="16" height="16">`,
+            );
+            expect(content).toContain(
+                `<span class="link-embed-mention-title">A title</span>`,
+            );
         });
     });
 
@@ -490,20 +609,22 @@ describe("content_renderer", () => {
             const note = buildShareNote({
                 type: "webView",
                 content: "",
-                ...(src !== undefined ? { "#webViewSrc": src } : {})
+                ...(src !== undefined ? { "#webViewSrc": src } : {}),
             });
             const root = parse(String(getContent(note).content));
             return { root, frame: root.querySelector("iframe") };
         }
 
         it("renders a frame carrying the source URL, and nothing else", () => {
-            const { root, frame } = renderWebViewNote("https://example.com/page");
+            const { root, frame } = renderWebViewNote(
+                "https://example.com/page",
+            );
             expect(root.childNodes.length).toBe(1);
             expect(frame?.rawTagName).toBe("iframe");
             expect(frame?.attributes).toStrictEqual({
                 class: "webview",
                 src: "https://example.com/page",
-                sandbox: SANDBOX
+                sandbox: SANDBOX,
             });
             expect(frame?.innerHTML).toBe("");
         });
@@ -517,10 +638,15 @@ describe("content_renderer", () => {
         it("loads an absolute http(s) source URL, normalising only its scheme and host", () => {
             for (const [src, expected] of [
                 ["https://example.com/page", "https://example.com/page"],
-                ["http://example.com/a?b=1&c=2", "http://example.com/a?b=1&c=2"],
-                ["HTTPS://Example.com/Page", "https://example.com/Page"]
+                [
+                    "http://example.com/a?b=1&c=2",
+                    "http://example.com/a?b=1&c=2",
+                ],
+                ["HTTPS://Example.com/Page", "https://example.com/Page"],
             ]) {
-                expect(renderWebViewNote(src).frame?.getAttribute("src")).toBe(expected);
+                expect(renderWebViewNote(src).frame?.getAttribute("src")).toBe(
+                    expected,
+                );
             }
         });
 
@@ -529,9 +655,11 @@ describe("content_renderer", () => {
             // docs build writes beside them, which is only ever reachable as a rooted path.
             for (const src of [
                 "/rest-api/etapi/",
-                "/script-api/frontend/interfaces/FNote.html"
+                "/script-api/frontend/interfaces/FNote.html",
             ]) {
-                expect(renderWebViewNote(src).frame?.getAttribute("src")).toBe(src);
+                expect(renderWebViewNote(src).frame?.getAttribute("src")).toBe(
+                    src,
+                );
             }
         });
 
@@ -553,7 +681,7 @@ describe("content_renderer", () => {
                 "JaVaScRiPt:alert(1)",
                 "data:text/html,<script>alert(1)</script>",
                 "vbscript:msgbox",
-                "not a url at all"
+                "not a url at all",
             ]) {
                 const { root, frame } = renderWebViewNote(src);
                 expect(frame).toBeNull();
@@ -566,11 +694,11 @@ describe("content_renderer", () => {
             // attribute value cannot end early and leave the rest of itself to be read as markup.
             for (const src of [
                 `https://example.com/?a=" onload="alert(1)" data-x="`,
-                `https://example.com/#" onload="alert(1)" data-x="`
+                `https://example.com/#" onload="alert(1)" data-x="`,
             ]) {
-                expect(Object.keys(renderWebViewNote(src).frame?.attributes ?? {})).toStrictEqual([
-                    "class", "src", "sandbox"
-                ]);
+                expect(
+                    Object.keys(renderWebViewNote(src).frame?.attributes ?? {}),
+                ).toStrictEqual(["class", "src", "sandbox"]);
             }
         });
     });
@@ -579,7 +707,7 @@ describe("content_renderer", () => {
         it("identifies empty content", () => {
             const emptyResult: Result = {
                 header: "",
-                content: "   "
+                content: "   ",
             };
             renderCode(emptyResult);
             expect(emptyResult.isEmpty).toBeTruthy();
@@ -588,7 +716,7 @@ describe("content_renderer", () => {
         it("identifies unsupported content type", () => {
             const emptyResult: Result = {
                 header: "",
-                content: Buffer.from("Hello world")
+                content: Buffer.from("Hello world"),
             };
             renderCode(emptyResult);
             expect(emptyResult.isEmpty).toBeTruthy();
@@ -597,20 +725,24 @@ describe("content_renderer", () => {
         it("wraps code in <pre><code>", () => {
             const result: Result = {
                 header: "",
-                content: "\tHello\nworld"
+                content: "\tHello\nworld",
             };
             renderCode(result);
             expect(result.isEmpty).toBeFalsy();
-            expect(result.content).toBe("<pre><code>\tHello\nworld</code></pre>");
+            expect(result.content).toBe(
+                "<pre><code>\tHello\nworld</code></pre>",
+            );
         });
 
         it("escapes HTML-significant characters so the content cannot be re-parsed as markup", () => {
             const result: Result = {
                 header: "",
-                content: `const x: Array<Map<string, number>> = a < b && c > d; // <div>`
+                content: `const x: Array<Map<string, number>> = a < b && c > d; // <div>`,
             };
             renderCode(result);
-            expect(result.content).toBe(`<pre><code>const x: Array&lt;Map&lt;string, number&gt;&gt; = a &lt; b &amp;&amp; c &gt; d; // &lt;div&gt;</code></pre>`);
+            expect(result.content).toBe(
+                `<pre><code>const x: Array&lt;Map&lt;string, number&gt;&gt; = a &lt; b &amp;&amp; c &gt; d; // &lt;div&gt;</code></pre>`,
+            );
         });
     });
 
@@ -621,8 +753,12 @@ describe("content_renderer", () => {
         });
 
         it("rejects code blocks beyond the line limit", () => {
-            expect(shouldSyntaxHighlight(Array(500).fill("x").join("\n"))).toBe(true);
-            expect(shouldSyntaxHighlight(Array(501).fill("x").join("\n"))).toBe(false);
+            expect(shouldSyntaxHighlight(Array(500).fill("x").join("\n"))).toBe(
+                true,
+            );
+            expect(shouldSyntaxHighlight(Array(501).fill("x").join("\n"))).toBe(
+                false,
+            );
         });
 
         it("rejects a single huge line that stays under the line limit", () => {
@@ -637,119 +773,202 @@ describe("content_renderer", () => {
             buildShareNote({
                 id: shareRoot.SHARE_ROOT_NOTE_ID,
                 children: [
-                    { "id": "child1", "title": "Child", "#shareAlias": `my alias"x` }
-                ]
+                    {
+                        id: "child1",
+                        title: "Child",
+                        "#shareAlias": `my alias"x`,
+                    },
+                ],
             });
             const note = buildShareNote({
-                "id": "indexNote",
-                "content": "<p>Index</p>",
-                "#shareIndex": ""
+                id: "indexNote",
+                content: "<p>Index</p>",
+                "#shareIndex": "",
             });
 
             const result = getContent(note);
-            const anchor = parse(String(result.content)).querySelector("#index a");
+            const anchor = parse(String(result.content)).querySelector(
+                "#index a",
+            );
 
             expect(anchor?.getAttribute("href")).toBe(`./my alias"x`);
-            expect(Object.keys(anchor?.attributes ?? {}).sort()).toEqual([ "class", "href" ]);
+            expect(Object.keys(anchor?.attributes ?? {}).sort()).toEqual([
+                "class",
+                "href",
+            ]);
         });
     });
     describe("Tree item template", () => {
         it("sets a working target and rel on external tree links only", () => {
             const external = renderTreeItemAnchor({
-                "id": "external1",
-                "#shareExternal": "https://example.com/page"
+                id: "external1",
+                "#shareExternal": "https://example.com/page",
             });
 
-            expect(external?.getAttribute("href")).toBe("https://example.com/page");
+            expect(external?.getAttribute("href")).toBe(
+                "https://example.com/page",
+            );
             expect(external?.getAttribute("target")).toBe("_blank");
             expect(external?.getAttribute("rel")).toBe("noopener noreferrer");
-            expect(Object.keys(external?.attributes ?? {}).sort())
-                .toEqual([ "class", "href", "rel", "target" ]);
+            expect(Object.keys(external?.attributes ?? {}).sort()).toEqual([
+                "class",
+                "href",
+                "rel",
+                "target",
+            ]);
 
             const internal = renderTreeItemAnchor({ id: "internal1" });
 
             expect(internal?.getAttribute("href")).toBe("./internal1");
-            expect(Object.keys(internal?.attributes ?? {}).sort()).toEqual([ "class", "href" ]);
+            expect(Object.keys(internal?.attributes ?? {}).sort()).toEqual([
+                "class",
+                "href",
+            ]);
         });
 
-        function renderTreeItemAnchor(noteDef: Parameters<typeof buildShareNote>[0]) {
+        function renderTreeItemAnchor(
+            noteDef: Parameters<typeof buildShareNote>[0],
+        ) {
             const note = buildShareNote(noteDef);
             const subRootNote = buildShareNote({ id: `subRoot-${noteDef.id}` });
 
-            const html = ejs.render(readTemplate(getDefaultTemplatePath("tree_item")), {
-                note,
-                activeNote: subRootNote,
-                subRoot: { note: subRootNote },
-                ancestors: [],
-                sanitizeUrl: sanitize.sanitizeUrl,
-                iconPackSupportedPrefixes: [],
-                t: (key: string) => key
-            });
+            const html = ejs.render(
+                readTemplate(getDefaultTemplatePath("tree_item")),
+                {
+                    note,
+                    activeNote: subRootNote,
+                    subRoot: { note: subRootNote },
+                    ancestors: [],
+                    sanitizeUrl: sanitize.sanitizeUrl,
+                    iconPackSupportedPrefixes: [],
+                    t: (key: string) => key,
+                },
+            );
 
             return parse(html).querySelector("a");
         }
     });
     describe("Subpage list template", () => {
+        it("renders publication landmarks while preserving public selectors", () => {
+            buildShareNote({
+                id: "publicationRoot",
+                title: "Field Notes",
+                content: "<h2>Opening</h2><p>Body</p><h2>Closing</h2>",
+                children: [{ id: "publicationChild", title: "Child" }],
+            });
+
+            const document = parse(renderPage("publicationRoot"));
+
+            expect(document.querySelector("body.is-collection")).toBeTruthy();
+            expect(
+                document.querySelector("header#header #header-logo span")
+                    ?.textContent,
+            ).toBe("Field Notes");
+            expect(
+                document.querySelector("aside#left-pane #navigation"),
+            ).toBeTruthy();
+            expect(
+                document.querySelector(
+                    "main#main .article-canvas article#content.article-body",
+                ),
+            ).toBeTruthy();
+            expect(document.querySelector("aside#toc-pane #toc")).toBeTruthy();
+            expect(
+                document.querySelector("footer#content-footer"),
+            ).toBeTruthy();
+            const searchInput = document.querySelector("input.search-input");
+            expect(searchInput?.getAttribute("aria-controls")).toBe(
+                "search-results",
+            );
+            expect(searchInput?.getAttribute("aria-expanded")).toBe("false");
+            expect(searchInput?.getAttribute("data-home")).toBe(
+                "share_theme.home",
+            );
+            expect(searchInput?.getAttribute("data-no-results")).toBe(
+                "share_theme.no-search-results",
+            );
+            expect(searchInput?.getAttribute("data-search-error")).toBe(
+                "share_theme.search-error",
+            );
+        });
+
         it("sets a working target and rel on external subpage links only", () => {
             buildShareNote({
                 id: "pageParent",
                 content: "<p>Parent</p>",
                 children: [
                     {
-                        "id": "pageExternal",
-                        "title": "External",
-                        "#shareExternal": "https://example.com/page"
+                        id: "pageExternal",
+                        title: "External",
+                        "#shareExternal": "https://example.com/page",
                     },
-                    { id: "pageInternal", title: "Internal" }
-                ]
+                    { id: "pageInternal", title: "Internal" },
+                ],
             });
             const anchors = renderPageAnchors("pageParent");
 
             const external = anchors.find((a) => a.textContent === "External");
-            expect(external?.getAttribute("href")).toBe("https://example.com/page");
+            expect(external?.getAttribute("href")).toBe(
+                "https://example.com/page",
+            );
             expect(external?.getAttribute("target")).toBe("_blank");
             expect(external?.getAttribute("rel")).toBe("noopener noreferrer");
-            expect(Object.keys(external?.attributes ?? {}).sort())
-                .toEqual([ "class", "href", "rel", "target" ]);
+            expect(Object.keys(external?.attributes ?? {}).sort()).toEqual([
+                "class",
+                "href",
+                "rel",
+                "target",
+            ]);
 
             const internal = anchors.find((a) => a.textContent === "Internal");
             expect(internal?.getAttribute("href")).toBe("./pageInternal");
-            expect(Object.keys(internal?.attributes ?? {}).sort()).toEqual([ "class", "href" ]);
+            expect(Object.keys(internal?.attributes ?? {}).sort()).toEqual([
+                "class",
+                "href",
+            ]);
         });
 
         function renderPageAnchors(noteId: string) {
+            return parse(renderPage(noteId)).querySelectorAll("#childLinks a");
+        }
+
+        function renderPage(noteId: string) {
             const note = shaca.getNote(noteId);
             const { header, content, isEmpty } = getContent(note);
 
-            const html = ejs.render(readTemplate(getDefaultTemplatePath("page")), {
-                note,
-                header,
-                content,
-                isEmpty,
-                assetPath: "assets",
-                assetUrlFragment: "assets",
-                showLoginInShareTheme: false,
-                t: (key: string) => key,
-                isDev: false,
-                utils,
-                sanitizeUrl: sanitize.sanitizeUrl,
-                subRoot: { note },
-                rootNoteId: noteId,
-                cssToLoad: [],
-                jsToLoad: [],
-                logoUrl: "",
-                ancestors: [],
-                isStatic: false,
-                faviconUrl: "",
-                iconPackCss: "",
-                iconPackSupportedPrefixes: []
-            }, {
-                includer: (path: string) => ({
-                    template: readTemplate(getDefaultTemplatePath(path))
-                })
-            });
-
-            return parse(html).querySelectorAll("#childLinks a");
+            return ejs.render(
+                readTemplate(getDefaultTemplatePath("page")),
+                {
+                    note,
+                    header,
+                    content,
+                    isEmpty,
+                    assetPath: "assets",
+                    assetUrlFragment: "assets",
+                    showLoginInShareTheme: false,
+                    locale: "en",
+                    direction: "ltr",
+                    t: (key: string) => key,
+                    isDev: false,
+                    utils,
+                    sanitizeUrl: sanitize.sanitizeUrl,
+                    subRoot: { note },
+                    rootNoteId: noteId,
+                    cssToLoad: [],
+                    jsToLoad: [],
+                    logoUrl: "",
+                    ancestors: [],
+                    isStatic: false,
+                    faviconUrl: "",
+                    iconPackCss: "",
+                    iconPackSupportedPrefixes: [],
+                },
+                {
+                    includer: (path: string) => ({
+                        template: readTemplate(getDefaultTemplatePath(path)),
+                    }),
+                },
+            );
         }
     });
 });

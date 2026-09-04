@@ -2,55 +2,78 @@
 #childLinks ul,
 #childLinks li {
     list-style: none;
-    display: flex;
-    align-items: center;
 }
 
 #childLinks {
-    padding-top: 10px;
-    flex-direction: column;
-    gap: 0px;
-    justify-content: center;
-    border-top: 1px solid var(--background-highlight);
+    max-width: 720px;
+    margin-top: 4rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+#childLinks > span {
+    display: block;
+    margin-bottom: 1rem;
+    color: var(--attention);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
 }
 
 .no-content + #childLinks {
-    border: 0;
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
 }
 
 #childLinks ul {
-    padding: 0;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    margin: 0;
+    padding: 1px;
+    background: var(--border);
 }
 
 #childLinks li {
+    display: flex;
+    min-width: 0;
     padding: 0;
-    background: var(--background-highlight);
-    border-radius: 12px;
+    background: var(--surface-primary);
 }
 
 #childLinks li a {
-    padding: 2px 12px;
-    background: var(--background-highlight);
-    border-radius: 12px;
-    transform: translateY(0);
-    transition: transform 200ms ease, background-color 200ms ease, color 200ms ease;
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    min-height: 74px;
+    padding: 1.15rem;
+    color: var(--text-heading);
+    font-weight: 600;
+    line-height: 1.35;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+#childLinks li a::before {
+    margin-inline-end: 0.65rem;
+    color: var(--attention);
+    content: "↗";
+    font-weight: 300;
 }
 
 #childLinks li a:hover {
-    background: var(--background-active);
-    color: var(--background-secondary);
+    background: var(--surface-subtle);
+    color: var(--text-link);
     text-decoration: none;
-    transform: translateY(-2px);
+}
+
+#childLinks.grid ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 #childLinks.grid li a {
-    padding: 50px;
-    color: var(--text-primary);
-}
-
-#childLinks.grid li a:hover {
-    transform: translateY(-5px);
+    min-height: 142px;
+    padding: 1.5rem;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
 }

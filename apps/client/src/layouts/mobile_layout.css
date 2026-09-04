@@ -12,18 +12,253 @@ kbd {
 }
 
 .action-button {
-    background: none;
     border: none;
+    padding-inline: 0.5em;
+    background: none;
+    color: var(--main-text-color);
     cursor: pointer;
     font-size: 1.25em;
-    padding-inline-start: 0.5em;
-    padding-inline-end: 0.5em;
-    color: var(--main-text-color);
 }
+
 .quick-search {
     margin: 0;
 }
+
 .quick-search .dropdown-menu {
     max-width: 350px;
 }
 
+#mobile-sidebar-wrapper {
+    max-height: 100%;
+    padding-inline: 0;
+    contain: content;
+}
+
+#detail-container .note-split-title {
+    align-items: center;
+}
+
+#mobile-bottom-bar #launcher-pane {
+    height: 53px;
+}
+
+.mobile-sidebar-toggle,
+.mobile-detail-menu {
+    min-width: 8px;
+    contain: none;
+}
+
+body.mobile #root-widget.knowledge-studio-mobile-shell {
+    --knowledge-studio-mobile-bar-height: 48px;
+    --knowledge-studio-mobile-dock-height: 58px;
+    min-width: 0;
+    min-height: 0;
+    background: var(--ks-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-stage {
+    min-width: 0;
+    min-height: 0;
+    background: var(--ks-canvas-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell #detail-container {
+    min-width: 0;
+    min-height: 0;
+    background: var(--ks-canvas-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note {
+    min-width: 0;
+    border: 0;
+    background: var(--ks-surface-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar {
+    min-height: var(--knowledge-studio-mobile-bar-height);
+    flex: 0 0 var(--knowledge-studio-mobile-bar-height);
+    gap: 2px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 15%, transparent);
+    padding-inline: max(2px, env(safe-area-inset-left)) max(2px, env(safe-area-inset-right));
+    background: var(--ks-shell-color);
+    color: var(--ks-on-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .note-title-widget {
+    min-width: 0;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .note-title-widget input {
+    min-width: 0;
+    color: var(--ks-on-shell-color);
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -.02em;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .note-icon-widget {
+    margin-inline: 2px 4px;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar :is(.icon-action, .note-icon) {
+    color: var(--ks-on-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .icon-action:not(.note-icon) {
+    --icon-button-size: 44px;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .note-icon {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 32px;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-note-bar .note-badges {
+    --badge-radius: var(--ks-radius-small);
+    max-width: 32%;
+    margin-inline: 2px;
+    gap: 2px;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content {
+    --content-margin-inline: clamp(18px, 5.5vw, 28px);
+    min-height: 0;
+    background: var(--ks-surface-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content > .inline-title {
+    width: 100%;
+    max-width: var(--max-content-width);
+    padding-block: 28px 10px;
+    padding-inline: var(--content-margin-inline);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content .inline-title-row {
+    align-items: flex-start;
+    gap: 10px;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content .inline-title .note-title-widget {
+    --note-title-size: clamp(1.85rem, 9vw, 2.55rem);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content .inline-title .note-title {
+    line-height: 1.04;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-content .title-actions {
+    --title-actions-padding-start: var(--content-margin-inline);
+    --title-actions-padding-end: var(--content-margin-inline);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock {
+    min-height: calc(var(--knowledge-studio-mobile-dock-height) + env(safe-area-inset-bottom));
+    flex: 0 0 auto;
+    border-top: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 15%, transparent);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--ks-shell-color);
+    color: var(--ks-on-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock #launcher-pane {
+    height: var(--knowledge-studio-mobile-dock-height);
+    background: transparent;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock #launcher-container {
+    justify-content: space-around;
+    padding-inline: max(4px, env(safe-area-inset-left)) max(4px, env(safe-area-inset-right));
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock :is(.launcher-button, .global-menu) {
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--ks-on-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock .launcher-button:is(:hover, :focus, .show),
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-dock .global-menu-button:is(:hover, :focus, .show) {
+    background: var(--ks-shell-raised-color) !important;
+}
+
+body.mobile .knowledge-studio-mobile-shell #mobile-sidebar-wrapper {
+    border: 0;
+    border-inline-end: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 13%, transparent);
+    border-radius: 0;
+    background: var(--ks-surface-muted-color);
+    box-shadow: var(--ks-raised-shadow);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation {
+    min-height: 0;
+    background: var(--ks-surface-muted-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation > .quick-search {
+    min-height: 48px;
+    border-bottom: 1px solid var(--ks-hairline-color);
+    padding: 2px 8px;
+    background: var(--ks-shell-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation > .quick-search::before {
+    border-color: color-mix(in srgb, var(--ks-on-shell-color) 20%, transparent);
+    background: var(--ks-shell-raised-color);
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation > .quick-search :is(input, .search-button) {
+    min-height: 44px;
+    color: var(--ks-on-shell-color) !important;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation > .quick-search .search-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    margin-inline-end: 0;
+}
+
+body.mobile .knowledge-studio-mobile-shell .knowledge-studio-mobile-navigation > .quick-search input::placeholder {
+    color: color-mix(in srgb, var(--ks-on-shell-color) 62%, transparent);
+}
+
+@media (max-width: 991px) {
+    body.mobile .knowledge-studio-mobile-shell #mobile-sidebar-wrapper {
+        width: min(88vw, 360px);
+    }
+
+    body.mobile .modal.show {
+        background: color-mix(in srgb, var(--ks-shell-color) 76%, transparent);
+    }
+
+    body.mobile .modal .modal-content {
+        border-radius: var(--ks-radius-large) var(--ks-radius-large) 0 0;
+        background: var(--ks-surface-color);
+        box-shadow: 0 -18px 48px color-mix(in srgb, var(--modal-shadow-color) 55%, transparent);
+    }
+
+    body.mobile .modal .modal-header {
+        min-height: 52px;
+        border-bottom-color: var(--ks-hairline-color);
+    }
+
+    body.mobile .modal .modal-header::before {
+        content: "";
+        position: absolute;
+        inset-block-start: 7px;
+        inset-inline-start: 50%;
+        width: 34px;
+        height: 3px;
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--main-text-color) 24%, transparent);
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.mobile .knowledge-studio-mobile-shell #mobile-sidebar-wrapper,
+    body.mobile .knowledge-studio-mobile-shell #mobile-sidebar-container {
+        transition-duration: .01ms !important;
+    }
+}

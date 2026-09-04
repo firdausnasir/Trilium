@@ -1,0 +1,23 @@
+@font-face {
+    font-family: "Knowledge Sans";
+    src: url("../fonts/Montserrat-Light.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Knowledge Sans";
+    src: url("../fonts/Montserrat-SemiBold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Knowledge Mono";
+    src: url("../fonts/JetBrainsMono-Light.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+}

@@ -1,0 +1,6 @@
+Knowledge Studio check passed
+State coverage: 102 registered IDs; 68 required IDs present
+Fonts: local Inter Variable, Montserrat, and JetBrains Mono assets with OFL texts
+Contrast: light text/surface 17.44:1; light muted/surface 6.17:1; light shell text 14.49:1; light primary/surface 7.55:1; light attention/surface 5.20:1; dark text/surface 13.25:1; dark muted/surface 7.22:1; dark shell text 17.37:1; dark primary/canvas 7.55:1; dark attention/canvas 7.45:1
+Source rules: no remote URLs, rejected motifs, duplicate imports, or broad transitions
+Static limitation: browser-computed target sizes and screenshot acceptance require manual review

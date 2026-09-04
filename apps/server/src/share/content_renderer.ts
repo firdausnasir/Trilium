@@ -1,7 +1,24 @@
-import { extractYouTubeVideoId, isHttpUrl, safeLinkPreviewHref, safeLinkPreviewImageSrc } from "@triliumnext/commons";
+import {
+    extractYouTubeVideoId,
+    isHttpUrl,
+    safeLinkPreviewHref,
+    safeLinkPreviewImageSrc,
+} from "@triliumnext/commons";
 import { renderToHtml as renderMarkdownToHtml } from "@triliumnext/commons/src/lib/markdown_renderer.js";
 import { renderSpreadsheetToHtml } from "@triliumnext/commons/src/lib/spreadsheet/render_to_html.js";
-import { type BAttachment, type BBranch, becca, BNote, getLog, icon_packs as iconPackService, options, sanitize, task_states, utils } from "@triliumnext/core";
+import {
+    type BAttachment,
+    type BBranch,
+    becca,
+    BNote,
+    getLog,
+    i18n,
+    icon_packs as iconPackService,
+    options,
+    sanitize,
+    task_states,
+    utils,
+} from "@triliumnext/core";
 import { highlightAuto } from "@triliumnext/highlightjs";
 import ejs from "ejs";
 import escapeHtml from "escape-html";
@@ -57,7 +74,7 @@ export interface Result {
 
 interface Subroot {
     note?: SNote | BNote;
-    branch?: SBranch | BBranch
+    branch?: SBranch | BBranch;
 }
 
 type GetNoteFunction = (id: string) => SNote | BNote | null;
@@ -75,30 +92,34 @@ function getSharedSubTreeRoot(note: SNote | BNote | undefined): Subroot {
     if (note instanceof BNote) {
         return {
             note,
-            branch: parentBranch
+            branch: parentBranch,
         };
     }
 
     if (parentBranch.parentNoteId === shareRoot.SHARE_ROOT_NOTE_ID) {
         return {
             note,
-            branch: parentBranch
+            branch: parentBranch,
         };
     }
 
     return getSharedSubTreeRoot(parentBranch.getParentNote());
 }
 
-export function renderNoteForExport(note: BNote, parentBranch: BBranch, basePath: string, ancestors: string[], iconPacks: iconPackService.ProcessedIconPack[]) {
+export function renderNoteForExport(
+    note: BNote,
+    parentBranch: BBranch,
+    basePath: string,
+    ancestors: string[],
+    iconPacks: iconPackService.ProcessedIconPack[],
+) {
     const subRoot: Subroot = {
         branch: parentBranch,
-        note: parentBranch.getNote()
+        note: parentBranch.getNote(),
     };
 
     // Determine JS to load.
-    const jsToLoad: string[] = [
-        `${basePath}assets/scripts.js`
-    ];
+    const jsToLoad: string[] = [`${basePath}assets/scripts.js`];
     for (const jsRelation of note.getRelations("shareJs")) {
         jsToLoad.push(`api/notes/${jsRelation.value}/download`);
     }
@@ -116,16 +137,24 @@ export function renderNoteForExport(note: BNote, parentBranch: BBranch, basePath
         ancestors,
         isStatic: true,
         iconPackCss: [
-            ...iconPacks.map(p => iconPackService.generateCss(p, `${basePath}assets/icon-pack-${p.prefix.toLowerCase()}.${iconPackService.MIME_TO_EXTENSION_MAPPINGS[p.fontMime]}`)),
-            task_states.generateTaskStateCss()
+            ...iconPacks.map((p) =>
+                iconPackService.generateCss(
+                    p,
+                    `${basePath}assets/icon-pack-${p.prefix.toLowerCase()}.${iconPackService.MIME_TO_EXTENSION_MAPPINGS[p.fontMime]}`,
+                ),
+            ),
+            task_states.generateTaskStateCss(),
         ]
             .filter(Boolean)
             .join("\n\n"),
-        iconPackSupportedPrefixes: iconPacks.map(p => p.prefix)
+        iconPackSupportedPrefixes: iconPacks.map((p) => p.prefix),
     });
 }
 
-export function renderNoteContent(note: SNote, canAccessInclude?: CanAccessInclude) {
+export function renderNoteContent(
+    note: SNote,
+    canAccessInclude?: CanAccessInclude,
+) {
     const subRoot = getSharedSubTreeRoot(note);
 
     const ancestors: string[] = [];
@@ -150,16 +179,18 @@ export function renderNoteContent(note: SNote, canAccessInclude?: CanAccessInclu
     }
 
     // Determine JS to load.
-    const jsToLoad: string[] = [
-        "assets/scripts.js"
-    ];
+    const jsToLoad: string[] = ["assets/scripts.js"];
     for (const jsRelation of note.getRelations("shareJs")) {
         jsToLoad.push(`api/notes/${jsRelation.value}/download`);
     }
 
     const customLogoId = note.getRelation("shareLogo")?.value;
-    const logoUrl = customLogoId ? `api/images/${customLogoId}/image.png` : `../${assetUrlFragment}/images/icon-color.svg`;
-    const iconPacks = iconPackService.getIconPacks().filter(p => p.builtin || !!shaca.notes[p.manifestNoteId]);
+    const logoUrl = customLogoId
+        ? `api/images/${customLogoId}/image.png`
+        : `../${assetUrlFragment}/images/icon-color.svg`;
+    const iconPacks = iconPackService
+        .getIconPacks()
+        .filter((p) => p.builtin || !!shaca.notes[p.manifestNoteId]);
 
     return renderNoteContentInternal(note, {
         subRoot,
@@ -170,17 +201,23 @@ export function renderNoteContent(note: SNote, canAccessInclude?: CanAccessInclu
         ancestors,
         isStatic: false,
         canAccessInclude,
-        faviconUrl: note.hasRelation("shareFavicon") ? `api/notes/${note.getRelationValue("shareFavicon")}/download` : `../favicon.ico`,
+        faviconUrl: note.hasRelation("shareFavicon")
+            ? `api/notes/${note.getRelationValue("shareFavicon")}/download`
+            : `../favicon.ico`,
         iconPackCss: [
-            ...iconPacks.map(p => iconPackService.generateCss(p, p.builtin
-                ? `assets/fonts/${p.fontAttachmentId}.${iconPackService.MIME_TO_EXTENSION_MAPPINGS[p.fontMime]}`
-                : `api/attachments/${p.fontAttachmentId}/download`
-            )),
-            task_states.generateTaskStateCss()
+            ...iconPacks.map((p) =>
+                iconPackService.generateCss(
+                    p,
+                    p.builtin
+                        ? `assets/fonts/${p.fontAttachmentId}.${iconPackService.MIME_TO_EXTENSION_MAPPINGS[p.fontMime]}`
+                        : `api/attachments/${p.fontAttachmentId}/download`,
+                ),
+            ),
+            task_states.generateTaskStateCss(),
         ]
             .filter(Boolean)
             .join("\n\n"),
-        iconPackSupportedPrefixes: iconPacks.map(p => p.prefix)
+        iconPackSupportedPrefixes: iconPacks.map((p) => p.prefix),
     });
 }
 
@@ -198,7 +235,10 @@ interface RenderArgs {
     iconPackSupportedPrefixes: string[];
 }
 
-function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) {
+function renderNoteContentInternal(
+    note: SNote | BNote,
+    renderArgs: RenderArgs,
+) {
     // When rendering static share, non-protected JavaScript notes should be rendered as-is.
     if (renderArgs.isStatic && note.mime.startsWith("application/javascript")) {
         if (note.isProtected) {
@@ -211,9 +251,12 @@ function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) 
     // Static export preserves full include-note nesting; the live share view renders only the first level.
     const { header, content, isEmpty } = getContent(note, {
         expandNestedIncludes: renderArgs.isStatic,
-        canAccessInclude: renderArgs.canAccessInclude
+        canAccessInclude: renderArgs.canAccessInclude,
     });
-    const showLoginInShareTheme = options.getOptionBool("showLoginInShareTheme");
+    const showLoginInShareTheme = options.getOptionBool(
+        "showLoginInShareTheme",
+    );
+    const locale = i18n.getCurrentLocale();
     const opts = {
         note,
         header,
@@ -222,6 +265,8 @@ function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) 
         assetPath: shareAdjustedAssetPath,
         assetUrlFragment,
         showLoginInShareTheme,
+        locale: locale.id,
+        direction: locale.rtl ? "rtl" : "ltr",
         t,
         isDev,
         utils,
@@ -237,15 +282,27 @@ function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) 
         const templateNote = templateId && shaca.getNote(templateId);
 
         // Make sure the note type is correct
-        if (templateNote && templateNote.type === "code" && templateNote.mime === "application/x-ejs") {
+        if (
+            templateNote &&
+            templateNote.type === "code" &&
+            templateNote.mime === "application/x-ejs"
+        ) {
             // EJS caches the result of this so we don't need to pre-cache
             const includer = (path: string) => {
-                const childNote = templateNote.children.find((n) => path === n.title);
-                if (!childNote) throw new Error(`Unable to find child note: ${path}.`);
-                if (childNote.type !== "code" || childNote.mime !== "application/x-ejs") throw new Error("Incorrect child note type.");
+                const childNote = templateNote.children.find(
+                    (n) => path === n.title,
+                );
+                if (!childNote)
+                    throw new Error(`Unable to find child note: ${path}.`);
+                if (
+                    childNote.type !== "code" ||
+                    childNote.mime !== "application/x-ejs"
+                )
+                    throw new Error("Incorrect child note type.");
 
                 const template = childNote.getContent();
-                if (typeof template !== "string") throw new Error("Invalid template content type.");
+                if (typeof template !== "string")
+                    throw new Error("Invalid template content type.");
 
                 return { template };
             };
@@ -257,8 +314,11 @@ function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) 
                     return ejs.render(content, opts, { includer });
                 }
             } catch (e: unknown) {
-                const [errMessage, errStack] = utils.safeExtractMessageAndStackFromError(e);
-                getLog().error(`Rendering user provided share template (${templateId}) threw exception ${errMessage} with stacktrace: ${errStack}`);
+                const [errMessage, errStack] =
+                    utils.safeExtractMessageAndStackFromError(e);
+                getLog().error(
+                    `Rendering user provided share template (${templateId}) threw exception ${errMessage} with stacktrace: ${errStack}`,
+                );
             }
         }
     }
@@ -269,14 +329,17 @@ function renderNoteContentInternal(note: SNote | BNote, renderArgs: RenderArgs) 
         includer: (path) => {
             // Path is relative to apps/server/dist/assets/views
             return { template: readTemplate(getDefaultTemplatePath(path)) };
-        }
+        },
     });
 }
 
 export function getDefaultTemplatePath(template: string) {
     // Path is relative to apps/server/dist/assets/views
     return process.env.NODE_ENV === "development"
-        ? join(__dirname, `../../../../packages/share-theme/src/templates/${template}.ejs`)
+        ? join(
+              __dirname,
+              `../../../../packages/share-theme/src/templates/${template}.ejs`,
+          )
         : join(getResourceDir(), `share-theme/templates/${template}.ejs`);
 }
 
@@ -315,19 +378,22 @@ export interface ShareRenderOptions {
     canAccessInclude?: CanAccessInclude;
 }
 
-export function getContent(note: SNote | BNote, options: ShareRenderOptions = {}) {
+export function getContent(
+    note: SNote | BNote,
+    options: ShareRenderOptions = {},
+) {
     if (note.isProtected) {
         return {
             header: "",
             content: "<p>Protected note cannot be displayed</p>",
-            isEmpty: false
+            isEmpty: false,
         };
     }
 
     const result: Result = {
         content: note.getContent(),
         header: "",
-        isEmpty: false
+        isEmpty: false,
     };
 
     if (note.type === "text") {
@@ -363,18 +429,28 @@ function renderIndex(result: Result) {
     for (const childNote of rootNote.getChildNotes()) {
         const isExternalLink = childNote.hasLabel("shareExternalLink");
         const rawHref = childNote.getLabelValue("shareExternalLink") ?? "";
-        const href = escapeHtml(isExternalLink ? sanitize.sanitizeUrl(rawHref) : `./${childNote.shareId}`);
-        const target = isExternalLink ? `target="_blank" rel="noopener noreferrer"` : "";
+        const href = escapeHtml(
+            isExternalLink
+                ? sanitize.sanitizeUrl(rawHref)
+                : `./${childNote.shareId}`,
+        );
+        const target = isExternalLink
+            ? `target="_blank" rel="noopener noreferrer"`
+            : "";
         result.content += `<li><a class="${childNote.type}" href="${href}" ${target}>${childNote.escapedTitle}</a></li>`;
     }
 
     result.content += "</ul>";
 }
 
-function renderText(result: Result, note: SNote | BNote, options: ShareRenderOptions = {}) {
+function renderText(
+    result: Result,
+    note: SNote | BNote,
+    options: ShareRenderOptions = {},
+) {
     if (typeof result.content !== "string") return;
     const parseOpts: Partial<Options> = {
-        blockTextElements: {}
+        blockTextElements: {},
     };
     const document = parse(result.content || "", parseOpts);
 
@@ -385,7 +461,11 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
     // third party without so much as a click.
     const renderPicture = (
         src: string | undefined | null,
-        { className, placeholder, size }: { className: string; placeholder: string; size?: number }
+        {
+            className,
+            placeholder,
+            size,
+        }: { className: string; placeholder: string; size?: number },
     ) => {
         const safeSrc = safeLinkPreviewImageSrc(src);
 
@@ -402,21 +482,24 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
     // `data-favicon` the element already carries. A site whose icon could not be had shows nothing
     // in its place: unlike a card's missing cover there is no hole to fill, and anything stood there
     // instead was read as a mark of its own rather than as an absent icon.
-    const renderFavicon = (favicon: string | undefined | null) => renderPicture(favicon, {
-        className: "link-embed-mention-favicon",
-        size: 16,
-        placeholder: ""
-    });
+    const renderFavicon = (favicon: string | undefined | null) =>
+        renderPicture(favicon, {
+            className: "link-embed-mention-favicon",
+            size: 16,
+            placeholder: "",
+        });
 
     // Process link mentions (inline) — metadata is stored in data attributes.
     for (const mentionEl of document.querySelectorAll("span.link-mention")) {
         const url = mentionEl.getAttribute("data-url");
         if (!url) continue;
-        const title = mentionEl.getAttribute("data-title") || safeHostnameForShare(url);
+        const title =
+            mentionEl.getAttribute("data-title") || safeHostnameForShare(url);
         // escapeHtml() makes the value safe to *place* in the attribute; it says nothing about the
         // scheme. `data-*` survives the save-time sanitizer untouched, so a stored
         // `data-url="javascript:…"` would otherwise become a live link on a public page.
-        mentionEl.innerHTML = `<a class="link-embed-mention" href="${escapeHtml(safeLinkPreviewHref(url))}" target="_blank" rel="noopener noreferrer">` +
+        mentionEl.innerHTML =
+            `<a class="link-embed-mention" href="${escapeHtml(safeLinkPreviewHref(url))}" target="_blank" rel="noopener noreferrer">` +
             renderFavicon(mentionEl.getAttribute("data-favicon")) +
             `<span class="link-embed-mention-title">${escapeHtml(title)}</span></a>`;
     }
@@ -435,35 +518,47 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
                 // not hand every visitor's IP to Google. The swap is done by the share theme's
                 // video_facade script, which reads data-video-id.
                 // No placeholder: the play button carries the facade on its own.
-                const thumbnailHtml = renderPicture(embedEl.getAttribute("data-image"), {
-                    className: "link-embed-video-thumbnail",
-                    placeholder: ""
-                });
-                embedEl.innerHTML = `<div class="link-embed-video">`
-                    + `<button type="button" class="link-embed-video-facade" data-video-id="${escapeHtml(videoId)}" aria-label="Play video" title="Play video">`
-                    + thumbnailHtml
-                    + `<span class="link-embed-video-play" aria-hidden="true"></span>`
-                    + `</button></div>`;
+                const thumbnailHtml = renderPicture(
+                    embedEl.getAttribute("data-image"),
+                    {
+                        className: "link-embed-video-thumbnail",
+                        placeholder: "",
+                    },
+                );
+                embedEl.innerHTML =
+                    `<div class="link-embed-video">` +
+                    `<button type="button" class="link-embed-video-facade" data-video-id="${escapeHtml(videoId)}" aria-label="Play video" title="Play video">` +
+                    thumbnailHtml +
+                    `<span class="link-embed-video-play" aria-hidden="true"></span>` +
+                    `</button></div>`;
             }
         } else {
-            const title = embedEl.getAttribute("data-title") || safeHostnameForShare(url);
+            const title =
+                embedEl.getAttribute("data-title") || safeHostnameForShare(url);
             const description = embedEl.getAttribute("data-description");
-            const siteName = embedEl.getAttribute("data-site-name") || safeHostnameForShare(url);
+            const siteName =
+                embedEl.getAttribute("data-site-name") ||
+                safeHostnameForShare(url);
 
             // The wrapper is there either way: it is what gives the card's left column its size, so
             // a card without a picture keeps the same shape as one with it.
-            const imageHtml = `<div class="link-embed-card-image-wrapper">`
-                + renderPicture(embedEl.getAttribute("data-image"), {
+            const imageHtml =
+                `<div class="link-embed-card-image-wrapper">` +
+                renderPicture(embedEl.getAttribute("data-image"), {
                     className: "link-embed-card-image",
-                    placeholder: `<div class="link-embed-card-image-placeholder">&#128279;</div>`
-                })
-                + `</div>`;
-            const descHtml = description ? `<div class="link-embed-card-description">${escapeHtml(description)}</div>` : "";
-            const urlHtml = `<div class="link-embed-card-url">`
-                + renderFavicon(embedEl.getAttribute("data-favicon"))
-                + `<span>${escapeHtml(siteName)}</span></div>`;
+                    placeholder: `<div class="link-embed-card-image-placeholder">&#128279;</div>`,
+                }) +
+                `</div>`;
+            const descHtml = description
+                ? `<div class="link-embed-card-description">${escapeHtml(description)}</div>`
+                : "";
+            const urlHtml =
+                `<div class="link-embed-card-url">` +
+                renderFavicon(embedEl.getAttribute("data-favicon")) +
+                `<span>${escapeHtml(siteName)}</span></div>`;
 
-            embedEl.innerHTML = `<a class="link-embed-card" href="${escapeHtml(safeLinkPreviewHref(url))}" target="_blank" rel="noopener noreferrer">` +
+            embedEl.innerHTML =
+                `<a class="link-embed-card" href="${escapeHtml(safeLinkPreviewHref(url))}" target="_blank" rel="noopener noreferrer">` +
                 imageHtml +
                 `<div class="link-embed-card-content"><div class="link-embed-card-title">${escapeHtml(title)}</div>${descHtml}${urlHtml}</div></a>`;
         }
@@ -475,7 +570,9 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
     // included in two sibling sub-trees as circular.
     const seenNoteIds = new Set(options.seenNoteIds);
     seenNoteIds.add(note.noteId);
-    for (const includeNoteEl of document.querySelectorAll("section.include-note")) {
+    for (const includeNoteEl of document.querySelectorAll(
+        "section.include-note",
+    )) {
         const noteId = includeNoteEl.getAttribute("data-note-id");
         if (!noteId) continue;
 
@@ -485,37 +582,68 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
         // An include must not disclose what a direct request for the same note would refuse: a note
         // carrying `shareCredentials` the caller has not presented becomes a placeholder, and its
         // title is withheld too, since an included note need not appear in the visible share tree.
-        if (options.canAccessInclude && !options.canAccessInclude(includedNote)) {
-            includeNoteEl.replaceWith(...parse(`<p class="include-note-forbidden">${escapeHtml(t("content_renderer.included-note-requires-credentials"))}</p>`, parseOpts).childNodes);
+        if (
+            options.canAccessInclude &&
+            !options.canAccessInclude(includedNote)
+        ) {
+            includeNoteEl.replaceWith(
+                ...parse(
+                    `<p class="include-note-forbidden">${escapeHtml(t("content_renderer.included-note-requires-credentials"))}</p>`,
+                    parseOpts,
+                ).childNodes,
+            );
             continue;
         }
 
         // Deeper-than-first-level includes (and any cycle in the recursive path) degrade to a
         // reference link that the link-processing passes below resolve to the shared note.
         if (options.includesAsReferenceLinks || seenNoteIds.has(noteId)) {
-            includeNoteEl.replaceWith(...parse(`<a class="reference-link" href="#root/${escapeHtml(noteId)}">${escapeHtml(includedNote.title)}</a>`, parseOpts).childNodes);
+            includeNoteEl.replaceWith(
+                ...parse(
+                    `<a class="reference-link" href="#root/${escapeHtml(noteId)}">${escapeHtml(includedNote.title)}</a>`,
+                    parseOpts,
+                ).childNodes,
+            );
             continue;
         }
 
-        const includedResult = getContent(includedNote, options.expandNestedIncludes
-            ? { expandNestedIncludes: true, seenNoteIds: new Set(seenNoteIds), canAccessInclude: options.canAccessInclude }
-            : { includesAsReferenceLinks: true, seenNoteIds: new Set(seenNoteIds), canAccessInclude: options.canAccessInclude });
+        const includedResult = getContent(
+            includedNote,
+            options.expandNestedIncludes
+                ? {
+                      expandNestedIncludes: true,
+                      seenNoteIds: new Set(seenNoteIds),
+                      canAccessInclude: options.canAccessInclude,
+                  }
+                : {
+                      includesAsReferenceLinks: true,
+                      seenNoteIds: new Set(seenNoteIds),
+                      canAccessInclude: options.canAccessInclude,
+                  },
+        );
         if (typeof includedResult.content !== "string") continue;
 
-        const includedDocument = parse(includedResult.content, parseOpts).childNodes;
+        const includedDocument = parse(
+            includedResult.content,
+            parseOpts,
+        ).childNodes;
         if (includedDocument) {
             includeNoteEl.replaceWith(...includedDocument);
         }
     }
 
-    result.isEmpty = document.textContent?.trim().length === 0 && document.querySelectorAll("img").length === 0;
+    result.isEmpty =
+        document.textContent?.trim().length === 0 &&
+        document.querySelectorAll("img").length === 0;
 
-    const getNote: GetNoteFunction = note instanceof BNote
-        ? (noteId: string) => becca.getNote(noteId)
-        : (noteId: string) => shaca.getNote(noteId);
-    const getAttachment = note instanceof BNote
-        ? (attachmentId: string) => becca.getAttachment(attachmentId)
-        : (attachmentId: string) => shaca.getAttachment(attachmentId);
+    const getNote: GetNoteFunction =
+        note instanceof BNote
+            ? (noteId: string) => becca.getNote(noteId)
+            : (noteId: string) => shaca.getNote(noteId);
+    const getAttachment =
+        note instanceof BNote
+            ? (attachmentId: string) => becca.getAttachment(attachmentId)
+            : (attachmentId: string) => shaca.getAttachment(attachmentId);
 
     if (!result.isEmpty) {
         // Process attachment links.
@@ -538,7 +666,10 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
 
         // Apply syntax highlight.
         for (const codeEl of document.querySelectorAll("pre code")) {
-            if (codeEl.classList.contains("language-mermaid") && note.type === "text") {
+            if (
+                codeEl.classList.contains("language-mermaid") &&
+                note.type === "text"
+            ) {
                 // Mermaid is handled on client-side, we don't want to break it by adding syntax highlighting.
                 continue;
             }
@@ -562,7 +693,12 @@ function renderText(result: Result, note: SNote | BNote, options: ShareRenderOpt
     }
 }
 
-function handleAttachmentLink(linkEl: HTMLElement, href: string, getNote: GetNoteFunction, getAttachment: (id: string) => BAttachment | SAttachment | null) {
+function handleAttachmentLink(
+    linkEl: HTMLElement,
+    href: string,
+    getNote: GetNoteFunction,
+    getAttachment: (id: string) => BAttachment | SAttachment | null,
+) {
     const linkRegExp = /attachmentId=([a-zA-Z0-9_]+)/g;
     let attachmentMatch;
     if ((attachmentMatch = linkRegExp.exec(href))) {
@@ -570,14 +706,19 @@ function handleAttachmentLink(linkEl: HTMLElement, href: string, getNote: GetNot
         const attachment = getAttachment(attachmentId);
 
         if (attachment) {
-            linkEl.setAttribute("href", `api/attachments/${attachmentId}/download`);
+            linkEl.setAttribute(
+                "href",
+                `api/attachments/${attachmentId}/download`,
+            );
             linkEl.classList.add(`attachment-link`);
             linkEl.classList.add(`role-${attachment.role}`);
             linkEl.childNodes.length = 0;
             linkEl.appendChild(new TextNode(attachment.title));
         } else {
             linkEl.removeAttribute("href");
-            getLog().error(`Broken attachment link detected in shared note: unable to find attachment with ID ${attachmentId}`);
+            getLog().error(
+                `Broken attachment link detected in shared note: unable to find attachment with ID ${attachmentId}`,
+            );
         }
     } else {
         const [notePath] = href.split("?");
@@ -587,7 +728,9 @@ function handleAttachmentLink(linkEl: HTMLElement, href: string, getNote: GetNot
         if (linkedNote) {
             const isExternalLink = linkedNote.hasLabel("shareExternalLink");
             const rawHref = linkedNote.getLabelValue("shareExternalLink") ?? "";
-            const href = isExternalLink ? sanitize.sanitizeUrl(rawHref) : `./${linkedNote.shareId}`;
+            const href = isExternalLink
+                ? sanitize.sanitizeUrl(rawHref)
+                : `./${linkedNote.shareId}`;
             if (href) {
                 linkEl.setAttribute("href", href);
             }
@@ -597,7 +740,9 @@ function handleAttachmentLink(linkEl: HTMLElement, href: string, getNote: GetNot
             }
             linkEl.classList.add(`type-${linkedNote.type}`);
         } else {
-            getLog().error(`Broken link detected in shared note: unable to find note with ID ${noteId}`);
+            getLog().error(
+                `Broken link detected in shared note: unable to find note with ID ${noteId}`,
+            );
             linkEl.removeAttribute("href");
         }
     }
@@ -643,15 +788,17 @@ function renderMarkdown(result: Result, note: SNote | BNote) {
 
     const html = renderMarkdownToHtml(result.content, note.title, {
         sanitize: sanitize.sanitizeHtml,
-        wikiLink: { formatHref: (id) => `./${id}` }
+        wikiLink: { formatHref: (id) => `./${id}` },
     });
 
     // Apply syntax highlighting to code blocks, same as renderText.
     const parseOpts: Partial<Options> = { blockTextElements: {} };
     const document = parse(html, parseOpts);
     for (const codeEl of document.querySelectorAll("pre code")) {
-        if (codeEl.classList.contains("language-mermaid")
-            || codeEl.classList.contains("language-text-x-trilium-auto")) {
+        if (
+            codeEl.classList.contains("language-mermaid") ||
+            codeEl.classList.contains("language-text-x-trilium-auto")
+        ) {
             continue;
         }
 
@@ -752,7 +899,9 @@ function renderWebView(note: SNote | BNote, result: Result) {
     if (!url) return;
 
     if (!isFramableSource(url)) {
-        getLog().error(`Web view of shared note '${note.noteId}' not rendered: '${url}' is neither an absolute http(s) URL nor a path on this site.`);
+        getLog().error(
+            `Web view of shared note '${note.noteId}' not rendered: '${url}' is neither an absolute http(s) URL nor a path on this site.`,
+        );
         return;
     }
 
@@ -762,7 +911,10 @@ function renderWebView(note: SNote | BNote, result: Result) {
     // origin is what lets the pages a web view is normally pointed at use their cookies and
     // storage, but it also means a page served from this very origin is not isolated from the page
     // embedding it; only dropping allow-same-origin would isolate it.
-    frame.setAttribute("sandbox", "allow-same-origin allow-scripts allow-popups");
+    frame.setAttribute(
+        "sandbox",
+        "allow-same-origin allow-scripts allow-popups",
+    );
     result.content = frame.toString();
 }
 
@@ -797,11 +949,14 @@ function isFramableSource(url: string): boolean {
     }
 }
 
-
 function safeHostnameForShare(url: string): string {
-    try { return new URL(url).hostname; } catch { return url; }
+    try {
+        return new URL(url).hostname;
+    } catch {
+        return url;
+    }
 }
 
 export default {
-    getContent
+    getContent,
 };

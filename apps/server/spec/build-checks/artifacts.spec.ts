@@ -1,9 +1,10 @@
-import { globSync } from "fs";
-import { join } from "path";
+import { existsSync, globSync, readFileSync, readdirSync } from "fs";
+import { basename, join } from "path";
 import { it, describe, expect } from "vitest";
 
 describe("Check artifacts are present", () => {
     const distPath = join(__dirname, "../../dist");
+    const sourceShareThemePath = join(__dirname, "../../../../packages/share-theme/dist");
 
     it("has the necessary node modules", async () => {
         const paths = [
@@ -35,6 +36,23 @@ describe("Check artifacts are present", () => {
         ];
 
         ensurePathsExist(paths);
+    });
+
+    it("serves every built share-theme asset and all referenced fonts", () => {
+        const servedShareThemePath = join(distPath, "share-theme/assets");
+        expect(readdirSync(servedShareThemePath).sort()).toEqual(readdirSync(sourceShareThemePath).sort());
+
+        const styles = readFileSync(join(servedShareThemePath, "styles.css"), "utf8");
+        const referencedAssets = [...styles.matchAll(/url\(["']?([^"')]+)/g)]
+            .map(match => match[1])
+            .filter(reference => !reference.startsWith("data:"));
+        for (const reference of referencedAssets) {
+            const assetName = basename(reference.split(/[?#]/)[0]);
+            expect(existsSync(join(servedShareThemePath, assetName)), reference).toBe(true);
+        }
+
+        expect(existsSync(join(servedShareThemePath, "Montserrat-OFL.txt"))).toBe(true);
+        expect(existsSync(join(servedShareThemePath, "JetBrainsMono-OFL.txt"))).toBe(true);
     });
 
     function ensurePathsExist(paths: string[]) {

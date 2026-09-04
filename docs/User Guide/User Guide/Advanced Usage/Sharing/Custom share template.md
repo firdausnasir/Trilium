@@ -18,7 +18,7 @@ There are two important constraints to be aware of:
 
 ## Content of the share template
 
-Use the [original template](https://github.com/TriliumNext/Notes/blob/develop/packages/share-theme/src/templates/page.ejs) as reference when creating a new share template.
+Use the [original template](https://github.com/TriliumNext/Trilium/blob/main/packages/share-theme/src/templates/page.ejs) as reference when creating a new share template.
 
 ## Available variables
 

@@ -8,9 +8,9 @@
 .ck-content code,
 .ck-content pre {
     color: var(--text-primary);
-    background-color: var(--background-secondary);
-    border: 1px solid var(--background-active);
-    border-radius: 6px;
+    background-color: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 2px;
 }
 
 /* Only a code block preserves the source's own line breaks. Inline code used to inherit this from
@@ -47,8 +47,44 @@
 #content h5,
 #content h6 {
     color: var(--text-heading);
-    border-bottom: 1px solid var(--background-highlight);
-    padding-bottom: 5px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.18;
+    text-wrap: balance;
+}
+
+#content h2 {
+    margin: 3.5rem 0 1.15rem;
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+#content h3 {
+    margin: 2.6rem 0 0.85rem;
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+#content :is(p, ul, ol, blockquote) {
+    max-width: 68ch;
+}
+
+#content p {
+    margin: 0 0 1.35em;
+}
+
+#content blockquote {
+    margin: 2rem 0;
+    border-inline-start: 4px solid var(--attention);
+    padding-block: 0.2rem;
+    padding-inline-start: 1.4rem;
+    color: var(--text-muted);
+    font-size: 1.12rem;
+}
+
+#content hr {
+    width: 3rem;
+    margin: 3.5rem 0;
+    border: 0;
+    border-top: 4px solid var(--attention);
 }
 
 #content img {
@@ -86,23 +122,29 @@ body.type-webView {
             border: 0;
         }
     }
+
+    .article-canvas {
+        height: 100%;
+        padding: 0;
+    }
 }
 
 /* table styles */
 .ck-content table {
     border-collapse: collapse;
     width: 100%;
+    margin: 2rem 0;
 }
 
 .ck-content table td,
 .ck-content table th {
     min-width: 120px;
-    border: 1px solid var(--background-highlight);
-    padding: 8px;
+    border: 1px solid var(--border);
+    padding: 0.65rem;
 }
 
 .ck-content table th {
-    background-color: var(--background-secondary);
+    background-color: var(--surface-subtle);
     font-weight: bold;
 }
 

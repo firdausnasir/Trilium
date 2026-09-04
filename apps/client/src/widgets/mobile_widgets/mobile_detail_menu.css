@@ -2,6 +2,15 @@
     background: none !important;
 }
 
+.mobile-detail-menu {
+    contain: none;
+}
+
+body.mobile.experimental-feature-new-layout .mobile-detail-menu > .note-actions > .dropdown > .icon-action {
+    --icon-button-size: 44px;
+    color: var(--ks-on-shell-color);
+}
+
 /* The modal is the frame here, so the list keeps neither the cap nor the padding it is given for the
    ribbon's tab (see SimilarNotesTab.css). Kept to the new layout, as it was when it lived in
    StatusBar.css — the old mobile look is not this change's to alter. */

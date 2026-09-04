@@ -20,7 +20,7 @@ if (isExternalLink) {
 
 <% if (note.hasVisibleChildren()) { %>
 <ul>
-    <% note.getVisibleChildNotes().forEach(function (childNote) { %>
+    <% for (const childNote of note.getVisibleChildNotes()) { %>
     <%
         const hasChildren = childNote.hasVisibleChildren();
         const isAncestorOfActive = ancestors.some(p => p === childNote.noteId);
@@ -29,6 +29,6 @@ if (isExternalLink) {
         <li class="<% if (hasChildren) { %>submenu-<% } %>item<%= expandedClass %>">
             <%- include('tree_item', {note: childNote, subRoot: subRoot}) %>
         </li>
-    <% }) %>
+    <% } %>
 </ul>
 <% } %>

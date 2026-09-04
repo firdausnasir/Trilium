@@ -1,3 +1,5 @@
+import "./desktop_layout.css";
+
 import type { AppContext } from "../components/app_context.js";
 import type { WidgetsByParent } from "../services/bundle.js";
 import { isExperimentalFeatureEnabled } from "../services/experimental_features.js";
@@ -64,27 +66,47 @@ export default class DesktopLayout {
         appContext.noteTreeWidget = new NoteTreeWidget();
 
         const launcherPaneIsHorizontal = options.get("layoutOrientation") === "horizontal";
-        const launcherPane = this.#buildLauncherPane(launcherPaneIsHorizontal);
+        const isNewLayout = isExperimentalFeatureEnabled("new-layout");
         const isElectron = utils.isElectron();
         const hasNativeTitleBar = window.glob.hasNativeTitleBar;
+        const placement = getDesktopShellPlacement({
+            launcherPaneIsHorizontal,
+            isNewLayout,
+            isElectron,
+            hasNativeTitleBar,
+            windowControlsOnLeft: isElectron && utils.areWindowControlsOnLeft()
+        });
+        const launcherPane = this.#buildLauncherPane(launcherPaneIsHorizontal, isNewLayout);
+        const layoutClassName = launcherPaneIsHorizontal ? "horizontal-layout" : "vertical-layout";
+        const rootClassName = isNewLayout
+            ? `${layoutClassName} knowledge-studio-shell`
+            : layoutClassName;
+        const noteBarClassName = isNewLayout
+            ? "title-row note-split-title knowledge-studio-note-bar"
+            : "title-row note-split-title";
 
         /**
-         * If true, the tab bar is displayed above the launcher pane with full width; if false (default), the tab bar is displayed in the rest pane.
-         * We force the full-width tab bar on Electron whenever the window controls sit on the left (always on macOS, and on Linux
-         * depending on the desktop's decoration layout): the rest pane starts past the launcher pane, so a tab bar confined to it
-         * cannot give those controls room, and they end up drawn over the launcher pane instead.
+         * New Layout uses a full-width tab row as its workspace bar. Classic keeps tabs in the rest
+         * pane unless the launcher is horizontal or Electron window controls need the full width.
          */
-        const fullWidthTabBar = launcherPaneIsHorizontal || (isElectron && !hasNativeTitleBar && utils.areWindowControlsOnLeft());
-        const isNewLayout = isExperimentalFeatureEnabled("new-layout");
+        const quickSearch = new QuickSearchWidget();
 
         const rootContainer = new RootContainer(true)
             .setParent(appContext)
-            .class(`${launcherPaneIsHorizontal ? "horizontal" : "vertical"  }-layout`)
+            .class(rootClassName)
             .optChild(
-                fullWidthTabBar,
+                placement.fullWidthTabBar,
                 new FlexContainer("row")
-                    .class("tab-row-container")
+                    .class(`tab-row-container${isNewLayout ? " knowledge-studio-workspace-bar" : ""}`)
                     .child(new FlexContainer("row").id("tab-row-left-spacer"))
+                    .optChild(
+                        placement.globalControlsInWorkspaceBar,
+                        new FlexContainer("row")
+                            .class("knowledge-studio-workspace-leading")
+                            .child(<GlobalMenu isHorizontalLayout={true} />)
+                            .child(<LeftPaneToggle isHorizontalLayout={true} />)
+                            .child(quickSearch)
+                    )
                     .optChild(launcherPaneIsHorizontal, <LeftPaneToggle isHorizontalLayout={true} />)
                     .child(<TabHistoryNavigationButtons />)
                     .child(new TabRowWidget().class("full-width"))
@@ -101,15 +123,19 @@ export default class DesktopLayout {
                     .optChild(!launcherPaneIsHorizontal, launcherPane)
                     .child(
                         new LeftPaneContainer()
-                            .optChild(!launcherPaneIsHorizontal, new QuickSearchWidget())
+                            .optChild(
+                                !placement.quickSearchInWorkspaceBar && !launcherPaneIsHorizontal,
+                                quickSearch
+                            )
                             .child(appContext.noteTreeWidget)
                             .child(...this.customWidgets.get("left-pane"))
                     )
                     .child(
                         new FlexContainer("column")
                             .id("rest-pane")
+                            .class(isNewLayout ? "knowledge-studio-workspace" : "")
                             .css("flex-grow", "1")
-                            .optChild(!fullWidthTabBar,
+                            .optChild(!placement.fullWidthTabBar,
                                 new FlexContainer("row")
                                     .class("tab-row-container")
                                     .child(<TabHistoryNavigationButtons />)
@@ -124,16 +150,18 @@ export default class DesktopLayout {
                                     .filling()
                                     .collapsible()
                                     .id("vertical-main-container")
+                                    .class(isNewLayout ? "knowledge-studio-main-stage" : "")
                                     .child(
                                         new FlexContainer("column")
                                             .filling()
                                             .collapsible()
                                             .id("center-pane")
+                                            .class(isNewLayout ? "knowledge-studio-canvas" : "")
                                             .child(
                                                 new SplitNoteContainer(() =>
                                                     new NoteWrapperWidget()
                                                         .child(new FlexContainer("row")
-                                                            .class("title-row note-split-title")
+                                                            .class(noteBarClassName)
                                                             .cssBlock(".title-row > * { margin: 5px; }")
                                                             .child(<NoteIconWidget />)
                                                             .child(<NoteTitleWidget />)
@@ -165,7 +193,7 @@ export default class DesktopLayout {
                                                         .child(<ApiLog />)
                                                         .child(new FindWidget())
                                                         .child(...this.customWidgets.get("note-detail-pane"))
-                                                )
+                                                ).class(isNewLayout ? "knowledge-studio-splits" : "")
                                             )
                                             .child(...this.customWidgets.get("center-pane"))
 
@@ -191,7 +219,7 @@ export default class DesktopLayout {
         return rootContainer;
     }
 
-    #buildLauncherPane(isHorizontal: boolean) {
+    #buildLauncherPane(isHorizontal: boolean, isNewLayout: boolean) {
         let launcherPane;
 
         if (isHorizontal) {
@@ -204,12 +232,38 @@ export default class DesktopLayout {
             launcherPane = new FlexContainer("column")
                 .css("width", "53px")
                 .class("vertical")
-                .child(<GlobalMenu isHorizontalLayout={false} />)
+                .optChild(!isNewLayout, <GlobalMenu isHorizontalLayout={false} />)
                 .child(<LauncherContainer isHorizontalLayout={false} />)
-                .child(<LeftPaneToggle isHorizontalLayout={false} />);
+                .optChild(!isNewLayout, <LeftPaneToggle isHorizontalLayout={false} />);
         }
 
         launcherPane.id("launcher-pane");
         return launcherPane;
     }
+}
+
+interface DesktopShellPlacementOptions {
+    launcherPaneIsHorizontal: boolean;
+    isNewLayout: boolean;
+    isElectron: boolean;
+    hasNativeTitleBar: boolean;
+    windowControlsOnLeft: boolean;
+}
+
+export function getDesktopShellPlacement({
+    launcherPaneIsHorizontal,
+    isNewLayout,
+    isElectron,
+    hasNativeTitleBar,
+    windowControlsOnLeft
+}: DesktopShellPlacementOptions) {
+    const globalControlsInWorkspaceBar = isNewLayout && !launcherPaneIsHorizontal;
+
+    return {
+        fullWidthTabBar: isNewLayout
+            || launcherPaneIsHorizontal
+            || (isElectron && !hasNativeTitleBar && windowControlsOnLeft),
+        globalControlsInWorkspaceBar,
+        quickSearchInWorkspaceBar: globalControlsInWorkspaceBar
+    };
 }

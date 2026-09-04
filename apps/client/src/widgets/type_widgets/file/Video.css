@@ -33,10 +33,15 @@
         transition: opacity 300ms ease;
         position: absolute;
         bottom: 0;
-        left: 0;
-        right: 0;
+        inset-inline: 0;
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(6px);
         color: white;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .video-preview-wrapper .media-preview-controls {
+        transition: none;
     }
 }

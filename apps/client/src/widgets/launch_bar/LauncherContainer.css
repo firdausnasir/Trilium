@@ -1,0 +1,12 @@
+#launcher-container {
+    display: flex;
+    flex-grow: 1;
+}
+
+#launcher-container.launcher-container-horizontal {
+    flex-direction: row;
+}
+
+#launcher-container.launcher-container-vertical {
+    flex-direction: column;
+}

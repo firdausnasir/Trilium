@@ -12,10 +12,10 @@ The `appThemeBase` label can be set to one of the following values:
 
 ## Overrides
 
-Do note that the TriliumNext theme has a few more overrides than the legacy theme. Due to that, it is recommended to use `#trilium-app` with a next theme instead of the `:root` of a legacy theme.
+Knowledge Studio semantic tokens are available to custom themes that inherit Next. Scope overrides to `#trilium-app` so they take precedence over the base theme. For example, `--ks-shell-color` controls the shared shell color, including both launcher orientations:
 
 ```css
 #trilium-app {
-	--launcher-pane-background-color: #0d6efd;
+    --ks-shell-color: #0d6efd;
 }
 ```

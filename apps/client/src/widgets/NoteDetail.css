@@ -11,8 +11,15 @@ body.prefers-centered-content .note-detail {
     margin-inline: auto;
 }
 
-.note-detail > * {
+.note-detail > .note-detail-type-wrapper {
     contain: none;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.note-detail > .note-detail-type-wrapper.full-height {
+    min-height: 0;
+    height: 100%;
 }
 
 .note-detail-loading-overlay {
@@ -45,5 +52,11 @@ body.prefers-centered-content .note-detail {
 
     to {
         opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .note-detail-loading-overlay {
+        animation: none;
     }
 }

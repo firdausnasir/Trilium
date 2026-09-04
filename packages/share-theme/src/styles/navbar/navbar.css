@@ -1,48 +1,38 @@
 #navigation {
     display: flex;
     flex-direction: column;
-    padding: 25px;
-    gap: 10px;
+    gap: 1rem;
+    min-height: 100%;
+    padding: 2rem 1.15rem;
 }
 
 #menu {
+    flex: 1;
     order: 1;
-/*         margin-left: auto; */
-
+    min-width: 0;
     white-space: nowrap;
-
-    flex: 0;
-/*         padding: 25px; */
 }
 
 #menu > ul {
-    overflow-y: auto;
-    list-style: none;
-    padding-left: 0!important;
+    padding-inline-start: 0 !important;
 }
 
-/*     #menu > ul, #menu > div {
-    width: fit-content;
-    margin-left: auto;
-} */
-
 #menu ul {
-    overflow-y: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
+    margin: 0;
+    padding-inline-start: 0.8rem;
+    overflow-y: hidden;
     list-style: none;
-    padding-left: 20px;
 }
 
 #menu li {
-/*         overflow-y: hidden; */
     position: relative;
     display: flex;
     flex-direction: column;
-     list-style: none;
-    cursor: pointer;
     max-width: 350px;
+    list-style: none;
 }
 
 #menu li span {
@@ -53,90 +43,74 @@
 
 #menu li .collapsible-label {
     display: flex;
-    flex: 1
+    flex: 1;
 }
 
 #menu li > ul {
-    transition: height 200ms ease;
+    transition: grid-template-rows 160ms ease;
 }
 
 #menu li:not(.expanded) > ul {
     height: 0;
     overflow: hidden;
-/*         transition: height 1000ms ease; */
-}
-
-#menu li.expanded > ul {
-/*         max-height: 500px; */
-}
-
-#menu p {
-    display: flex;
 }
 
 #menu li.item > a {
-    padding-left: 24px;
+    padding-inline-start: 2rem;
 }
 
 #menu a {
     display: inline-flex;
+    flex: 1;
     align-items: center;
     justify-content: flex-start;
-    gap: 5px;
+    gap: 0.45rem;
+    min-height: 34px;
+    border-inline-start: 2px solid transparent;
+    padding: 0.3rem 0.45rem;
     color: var(--text-menu);
+    font-size: 0.78rem;
+    font-weight: 300;
+    line-height: 1.25;
     text-decoration: none;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    flex: 1;
-    padding: 2px 6px;
-    font-weight: 400;
 }
 
 #menu a:hover {
-    border-color: var(--text-menu);
+    border-inline-start-color: #8391aa;
+    background: rgba(255, 255, 255, 0.06);
+    text-decoration: none;
 }
 
 #menu a.active {
-    background: var(--background-active);
-    color: var(--background-secondary);
-    font-weight: 700;
-}
-
-#menu li ul {
-    position: relative;
+    border-inline-start-color: #7fa6ff;
+    background: rgba(95, 142, 255, 0.14);
+    color: #ffffff;
+    font-weight: 600;
 }
 
 #menu li ul::before {
-    content: "";
-    display: flex;
     position: absolute;
-    top: 5px;
-    bottom: 5px;
-    left: 10px;
-    width: 2px;
-    background: var(--background-highlight);
+    top: 0.3rem;
+    bottom: 0.3rem;
+    inset-inline-start: 0.15rem;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    content: "";
 }
-
-.active .collapse-button {
-    background: none;
-    color: var(--background-secondary);
-}
-
 
 .collapse-button {
-    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    background: var(--background-secondary);
+    min-width: 24px;
+    min-height: 24px;
     border: 0;
-    color: var(--text-menu);
-/*         position: absolute; */
-/*         top: 2px; */
-/*         left: -18px; */
+    padding: 0;
+    background: transparent;
+    color: currentColor;
+    cursor: pointer;
     transform: rotate(-90deg);
-    transition: transform 200ms ease;
+    transition: transform 140ms ease;
 }
 
 .expanded > .collapse-button,
@@ -144,6 +118,15 @@
     transform: rotate(0);
 }
 
+html[dir="rtl"] .collapse-button {
+    transform: rotate(90deg);
+}
+
+html[dir="rtl"] .expanded > .collapse-button,
+html[dir="rtl"] .expanded > a > .collapse-button {
+    transform: rotate(0);
+}
+
 .collapse-button svg {
-    width: 14px;
+    width: 12px;
 }

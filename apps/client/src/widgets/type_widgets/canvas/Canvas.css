@@ -25,11 +25,11 @@
 }
 
 /* collaboration not possible so hide the button */
-.CollabButton {
+.note-detail-canvas .excalidraw .CollabButton {
   display: none !important;
 }
 
-.library-button {
+.note-detail-canvas .excalidraw .library-button {
   display: none !important; /* library won't work without extra support which isn't currently implemented */
 }
 

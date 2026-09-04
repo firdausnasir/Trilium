@@ -5,13 +5,11 @@ Trilium supports two different layouts, based on your preference.
 
 ### Vertical layout
 
-The vertical layout is Trilium's original layout:
+In the vertical orientation:
 
-*   The <a class="reference-link" href="Launch%20Bar.md">Launch Bar</a> is positioned on the left side of the screen, with buttons being laid out vertically.
-*   The tab bar is at the top, but to the right of the <a class="reference-link" href="Note%20Tree.md">Note Tree</a>.
-*   The <a class="reference-link" href="../Navigation/Quick%20search.md">Quick search</a> is at the top of the <a class="reference-link" href="Note%20Tree.md">Note Tree</a>.
-*   The <a class="reference-link" href="Note%20Tree.md">Note Tree</a> can be collapsed by pressing the ![](5_Vertical%20and%20horizontal%20layout_image.png) button at the bottom of the <a class="reference-link" href="Launch%20Bar.md">Launch Bar</a>.
-*   The <a class="reference-link" href="Global%20menu.md">Global menu</a> can be accessed via the ![](4_Vertical%20and%20horizontal%20layout_image.png) icon at the top of the <a class="reference-link" href="Launch%20Bar.md">Launch Bar</a>.
+*   The <a class="reference-link" href="Launch%20Bar.md">Launch Bar</a> is positioned on the left, with launcher buttons arranged vertically.
+*   In the <a class="reference-link" href="New%20Layout.md">New Layout</a>, one full-width workspace bar contains the <a class="reference-link" href="Global%20menu.md">Global menu</a>, note-tree toggle, <a class="reference-link" href="../Navigation/Quick%20search.md">Quick search</a>, tabs and <a class="reference-link" href="Right%20Sidebar.md">right sidebar</a> toggle. The vertical Launch Bar contains the configured launchers.
+*   In the Classic layout, the tab bar is at the top beside the <a class="reference-link" href="Note%20Tree.md">Note Tree</a>, with Quick search above the tree. The tree collapse button ![](5_Vertical%20and%20horizontal%20layout_image.png) remains at the bottom of the Launch Bar, and the Global menu ![](4_Vertical%20and%20horizontal%20layout_image.png) remains at the top.
 
 ![](3_Vertical%20and%20horizontal%20layout_image.png)
 

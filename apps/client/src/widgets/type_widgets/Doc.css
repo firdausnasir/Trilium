@@ -37,15 +37,15 @@
     padding-bottom: 0.25em;
 }
 
-img {
+.note-detail-doc-content img {
     max-width: 100%;
     height: auto;
 }
 
-td img {
+.note-detail-doc-content td img {
     max-width: 40vw;
 }
 
-figure.table {
+.note-detail-doc-content figure.table {
     overflow: auto !important;
 }

@@ -1,7 +1,6 @@
 import "./NoteDetail.css";
 
 import clsx from "clsx";
-import { note } from "mermaid/dist/rendering-util/rendering-elements/shapes/note.js";
 import { isValidElement, VNode } from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
 
@@ -289,10 +288,13 @@ function NoteDetailWrapper({ Element, type, isVisible, isFullHeight, props }: { 
     return (
         <div
             ref={wrapperRef}
-            className={`${typeMapping.className} ${typeMapping.printable ? "note-detail-printable" : ""} ${isVisible ? "visible" : "hidden-ext"}`}
-            style={{
-                height: isFullHeight ? "100%" : ""
-            }}
+            className={clsx(
+                "note-detail-type-wrapper",
+                typeMapping.className,
+                typeMapping.printable && "note-detail-printable",
+                isVisible ? "visible" : "hidden-ext",
+                isFullHeight && "full-height"
+            )}
         >
             <Element {...cachedProps} isVisible={isVisible && containerVisible} />
         </div>
@@ -464,7 +466,7 @@ export function checkFullHeight(noteContext: NoteContext | undefined, type: Exte
 
     // https://github.com/zadam/trilium/issues/2522
     const isBackendNote = noteContext?.noteId === "_backendLog";
-    const isFullHeightNoteType = type && TYPE_MAPPINGS[type].isFullHeight;
+    const isFullHeightNoteType = type && TYPE_MAPPINGS[type].layout === "full-height";
 
     // Allow vertical centering when there are no results.
     if (type === "book" &&

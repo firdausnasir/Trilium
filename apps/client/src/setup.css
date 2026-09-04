@@ -7,50 +7,109 @@ body {
 }
 
 body.setup {
+    --setup-paper: var(--ks-surface-color);
+    --setup-paper-raised: var(--ks-surface-muted-color);
+    --setup-ink-soft: var(--muted-text-color);
+    --setup-accent: var(--ks-primary-color);
     margin: 0;
     padding: 0;
+    background: var(--ks-shell-color);
 
-    &>.setup-outer-wrapper {
+    & > .setup-outer-wrapper {
         width: 100dvw;
         height: 100dvh;
 
-        body:not(.electron) & {
-            @media (min-width: 700px) {
-                background:
-                    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-                    radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.25) 0%, transparent 50%),
-                    radial-gradient(ellipse at 60% 80%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
-                    var(--left-pane-background-color);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 2em;
-            }
-        }
-
         .setup-container {
-            background-color: var(--main-background-color);
-            border-radius: 16px;
-            padding: 2em;
-            flex-direction: column;
-            gap: 2rem;
+            display: flex;
+            background: var(--setup-paper);
+            border: 1px solid var(--ks-hairline-color);
+            border-radius: var(--ks-radius-large);
+            padding: 0;
             position: relative;
             height: 100%;
+            isolation: isolate;
+            overflow: hidden;
+
+            &.knowledge-studio-entry-container {
+                display: grid;
+                grid-template-columns: 172px minmax(0, 1fr);
+            }
 
             @media (min-width: 700px) {
-                display: flex;
-                width: 750px;
-                height: 650px;
+                width: min(860px, 100%);
+                height: min(690px, 100%);
                 top: unset;
-                overflow: hidden;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                box-shadow:
+                    0 1px 0
+                        color-mix(
+                            in srgb,
+                            var(--ks-on-shell-color) 9%,
+                            transparent
+                        )
+                        inset,
+                    var(--ks-raised-shadow);
+            }
+
+            .entry-signal {
+                position: relative;
+                z-index: 2;
+                display: flex;
+                min-width: 0;
+                flex-direction: column;
+                justify-content: space-between;
+                border-inline-end: 1px solid
+                    color-mix(
+                        in srgb,
+                        var(--ks-on-shell-color) 14%,
+                        transparent
+                    );
+                padding: 24px 20px;
+                background: var(--ks-shell-color);
+                color: var(--ks-on-shell-color);
+
+                img {
+                    width: 54px;
+                    height: 54px;
+                }
+
+                .entry-signal-lines {
+                    display: grid;
+                    gap: 7px;
+
+                    span {
+                        width: 100%;
+                        height: 4px;
+                        background: color-mix(
+                            in srgb,
+                            var(--ks-on-shell-color) 22%,
+                            transparent
+                        );
+                    }
+
+                    span:nth-child(2) {
+                        width: 68%;
+                        background: var(--ks-attention-color);
+                    }
+
+                    span:nth-child(3) {
+                        width: 42%;
+                        background: var(--setup-accent);
+                    }
+                }
+            }
+
+            .setup-stage {
+                position: relative;
+                min-width: 0;
+                min-height: 0;
+                background: var(--setup-paper);
             }
 
             .setup-options {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                gap: 1rem;
+                gap: 0.65rem;
 
                 body.desktop & {
                     gap: 0.75rem;
@@ -58,31 +117,47 @@ body.setup {
             }
 
             .setup-option-card {
+                --card-background-color: var(--setup-paper);
                 display: flex;
                 align-items: center;
                 gap: 1rem;
-                padding: .75em 1.5em;
+                min-height: 44px;
+                padding: 0.8em 1.25em 0.8em 1em;
                 cursor: pointer;
+                border-color: var(--ks-hairline-color);
+                border-radius: var(--ks-radius-small);
+                border-inline-start: 3px solid
+                    color-mix(in srgb, var(--setup-accent) 45%, transparent);
+                box-shadow: none;
+                transition:
+                    background-color 160ms ease-out,
+                    border-color 160ms ease-out,
+                    transform 160ms ease-out;
 
                 &.disabled {
                     cursor: not-allowed;
                     opacity: 0.5;
                     background-color: transparent;
-                    border-color: var(--main-border-color)
+                    border-color: var(--main-border-color);
                 }
 
-                &:not(.disabled):hover {
-                    background-color: var(--card-background-hover-color);
-                    filter: contrast(105%);
-                    transition: background-color .2s ease-out;
+                &:not(.disabled):is(:hover, :focus-within) {
+                    background-color: var(--ks-primary-soft-color);
+                    border-color: var(--setup-accent);
+                    transform: translateY(-1px);
+                }
+
+                &:not(.disabled):active {
+                    background-color: var(--ks-primary-soft-color);
+                    transform: translateY(0);
                 }
 
                 .tn-icon {
-                    font-size: 2.5em;
-                    color: var(--muted-text-color);
+                    font-size: 2.15em;
+                    color: var(--setup-accent);
                     /* A box of its own rather than whatever width the glyph happens to have, so
                        every title and description in the list starts on the same line however
-                       large the icon beside it is drawn. One em at this size is 2.5em of the card,
+                       large the icon beside it is drawn. One em at this size is 2.15em of the card,
                        which is the measure the quieter card below matches itself to. */
                     width: 1em;
                     flex-shrink: 0;
@@ -92,7 +167,9 @@ body.setup {
                 h3 {
                     margin-bottom: 4px;
                     font-size: 1.15em;
-                    font-weight: normal;
+                    font-family: var(--ks-display-font-family);
+                    font-weight: 650;
+                    line-height: 1.15;
 
                     body.desktop & {
                         font-size: 1.3em;
@@ -101,8 +178,9 @@ body.setup {
 
                 p:last-of-type {
                     margin-bottom: 0;
-                    font-size: .85em;
-                    color: var(--muted-text-color);
+                    font-size: 0.875em;
+                    line-height: 1.45;
+                    color: var(--setup-ink-soft);
                 }
             }
 
@@ -111,13 +189,14 @@ body.setup {
             .setup-keep-card {
                 margin-bottom: 0.5rem;
                 background-color: transparent;
+                border-inline-start-color: var(--main-border-color);
 
                 .tn-icon {
                     font-size: 1.75em;
-                    /* Drawn smaller, but taking the same room: 2.5em of the card, written in this
+                    /* Drawn smaller, but taking the same room: 2.15em of the card, written in this
                        icon's own units. Without it the smaller glyph pulls its title left and the
                        item stops lining up with the four below. */
-                    width: calc(2.5em / 1.75);
+                    width: calc(2.15em / 1.75);
                 }
 
                 h3 {
@@ -131,16 +210,26 @@ body.setup {
         }
 
         .page {
+            --setup-page-padding-block: clamp(1.25rem, 4vw, 2.25rem);
+            --setup-page-padding-inline: clamp(1.25rem, 5vw, 3.25rem);
             display: flex;
             flex-direction: column;
             height: 100%;
-            padding-top: calc(2em + env(safe-area-inset-top));
-            padding-bottom: calc(2em + env(safe-area-inset-bottom));
-            padding-left: calc(2em + env(safe-area-inset-left));
-            padding-right: calc(2em + env(safe-area-inset-right));
+            padding-top: calc(
+                var(--setup-page-padding-block) + env(safe-area-inset-top)
+            );
+            padding-bottom: calc(
+                var(--setup-page-padding-block) + env(safe-area-inset-bottom)
+            );
+            padding-inline-start: calc(
+                var(--setup-page-padding-inline) + env(safe-area-inset-left)
+            );
+            padding-inline-end: calc(
+                var(--setup-page-padding-inline) + env(safe-area-inset-right)
+            );
             overflow: auto;
 
-            >.back-button {
+            > .back-button {
                 /* `.page` scrolls (not `.setup-container`), so sticky is required here, not
                    absolute, to stay in flow and follow the scroll. */
                 position: sticky;
@@ -149,9 +238,10 @@ body.setup {
                 align-self: flex-start;
                 z-index: 1;
                 color: var(--muted-text-color);
+                min-height: 44px;
                 /* Sticky content still scrolls in underneath; an opaque fill stops it showing
                    through, same technique `.page > footer` below already uses. */
-                background: var(--main-background-color);
+                background: var(--setup-paper);
 
                 body.background-effects & {
                     background: transparent;
@@ -166,16 +256,16 @@ body.setup {
                     margin-inline-end: 0.4em;
                 }
 
-                body[dir=rtl] & .tn-icon {
+                body[dir="rtl"] & .tn-icon {
                     transform: scaleX(-1);
                 }
             }
 
-            >main {
+            > main {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
-                padding-top: 2em;
+                padding-top: 1.75em;
 
                 body.desktop & {
                     padding-top: 1em;
@@ -187,32 +277,54 @@ body.setup {
                 align-items: center;
             }
 
-            >footer {
-                background: var(--main-background-color);
+            > footer {
+                background: var(--setup-paper);
                 position: sticky;
-                bottom: -2rem;
-                left: 0;
-                right: 0;
+                bottom: calc(
+                    0px - var(--setup-page-padding-block) -
+                        env(safe-area-inset-bottom)
+                );
+                inset-inline: 0;
                 display: flex;
                 justify-content: flex-end;
                 gap: 0.5rem;
-                border-top: 1px solid var(--main-border-color);
+                border-top: 1px solid var(--ks-hairline-color);
                 padding-top: 1rem;
-                padding-bottom: 2rem;
-                margin-inline: -2rem;
-                margin-bottom: -2rem;
-                padding-inline: 2rem;
+                padding-bottom: calc(
+                    var(--setup-page-padding-block) +
+                        env(safe-area-inset-bottom)
+                );
+                margin-inline-start: calc(
+                    0px - var(--setup-page-padding-inline) -
+                        env(safe-area-inset-left)
+                );
+                margin-inline-end: calc(
+                    0px - var(--setup-page-padding-inline) -
+                        env(safe-area-inset-right)
+                );
+                margin-bottom: calc(
+                    0px - var(--setup-page-padding-block) -
+                        env(safe-area-inset-bottom)
+                );
+                padding-inline-start: calc(
+                    var(--setup-page-padding-inline) + env(safe-area-inset-left)
+                );
+                padding-inline-end: calc(
+                    var(--setup-page-padding-inline) +
+                        env(safe-area-inset-right)
+                );
 
                 body.background-effects & {
                     background: transparent;
                 }
             }
 
-            >.page-error {
+            > .page-error {
                 position: absolute;
                 top: 0;
                 inset-inline: 0;
-                background: color-mix(in srgb, var(--accent-color) 15%, var(--main-background-color));
+                border-inline-start: 4px solid var(--ks-attention-color);
+                background: var(--ks-attention-soft-color);
                 z-index: 1;
                 margin: 0;
                 border-radius: 0;
@@ -222,7 +334,7 @@ body.setup {
                 user-select: text;
 
                 @media (min-width: 700px) {
-                    border-radius: 16px 16px 0 0;
+                    border-radius: 2px 2px 0 0;
                 }
 
                 button {
@@ -230,6 +342,12 @@ body.setup {
                     top: 0.5em;
                     inset-inline-end: 0.5em;
                 }
+            }
+
+            > footer .btn,
+            input,
+            select {
+                min-height: 44px;
             }
         }
 
@@ -241,7 +359,7 @@ body.setup {
             margin-inline: auto;
 
             body.desktop & {
-                width: 80%;
+                width: min(88%, 610px);
             }
 
             .form-group {
@@ -278,10 +396,10 @@ body.setup {
 
         .tn-icon {
             font-size: 3em;
-            color: var(--muted-text-color);
+            color: var(--setup-accent);
         }
 
-        >div {
+        > div {
             display: flex;
             flex-direction: column;
             text-align: center;
@@ -300,8 +418,7 @@ body.setup {
                 position: absolute;
                 border: 2px dashed var(--main-border-color);
                 top: 1.5em;
-                left: 0;
-                right: 0;
+                inset-inline: 0;
             }
         }
     }
@@ -309,8 +426,8 @@ body.setup {
     .illustration-icon {
         font-size: 4em;
         text-align: center;
-        color: var(--muted-text-color);
-        opacity: 0.6;
+        color: var(--setup-accent);
+        opacity: 0.82;
     }
 
     .illustration-logo {
@@ -334,18 +451,41 @@ body.setup {
     }
 
     h1 {
-        font-size: 1.4em;
+        max-width: 20ch;
+        margin-inline: auto;
+        font-family: var(--ks-display-font-family);
+        font-size: clamp(1.65rem, 4vw, 2.25rem);
+        font-weight: 650;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
         text-align: center;
+        text-wrap: balance;
     }
 
-    h1 + p {
+    h1 + p,
+    .page-description {
+        max-width: 58ch;
+        margin-inline: auto;
         text-align: center;
-        color: var(--muted-text-color);
+        color: var(--setup-ink-soft);
+        line-height: 1.6;
         margin-bottom: 0;
+        text-wrap: pretty;
     }
 
     .tooltip {
         z-index: 15 !important;
+    }
+}
+
+body.setup:not(.electron) > .setup-outer-wrapper {
+    background: var(--ks-canvas-color);
+
+    @media (min-width: 700px) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: clamp(1rem, 3vw, 2.5rem);
     }
 }
 
@@ -354,13 +494,75 @@ body.setup.background-effects .setup-container {
     background: transparent;
 }
 
+@media (max-width: 699px) {
+    body.setup
+        > .setup-outer-wrapper
+        .setup-container.knowledge-studio-entry-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: calc(76px + env(safe-area-inset-top)) minmax(0, 1fr);
+        width: 100dvw;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    body.setup
+        > .setup-outer-wrapper
+        .setup-container.knowledge-studio-entry-container
+        .entry-signal {
+        flex-direction: row;
+        align-items: center;
+        border-inline-end: 0;
+        border-bottom: 1px solid
+            color-mix(in srgb, var(--ks-on-shell-color) 14%, transparent);
+        padding: calc(10px + env(safe-area-inset-top))
+            max(16px, env(safe-area-inset-right)) 10px
+            max(16px, env(safe-area-inset-left));
+    }
+
+    body.setup
+        > .setup-outer-wrapper
+        .setup-container.knowledge-studio-entry-container
+        .entry-signal
+        img {
+        width: 42px;
+        height: 42px;
+    }
+
+    body.setup
+        > .setup-outer-wrapper
+        .setup-container.knowledge-studio-entry-container
+        .entry-signal-lines {
+        width: 78px;
+    }
+
+    body.setup
+        > .setup-outer-wrapper
+        .setup-container.knowledge-studio-entry-container
+        .page {
+        --setup-page-padding-block: 1.25rem;
+        --setup-page-padding-inline: 1.25rem;
+        padding-top: var(--setup-page-padding-block);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.setup .setup-option-card {
+        transition-duration: 0.01ms !important;
+    }
+
+    body.setup .setup-option-card:not(.disabled):is(:hover, :focus-within) {
+        transform: none;
+    }
+}
+
 /* macOS: draggable title bar region and traffic light buttons */
 body.setup.platform-darwin {
     .drag-region {
         position: absolute;
         top: 0;
-        left: 0;
-        right: 0;
+        inset-inline: 0;
         height: 40px;
         -webkit-app-region: drag;
         z-index: 10;

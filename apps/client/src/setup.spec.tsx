@@ -31,7 +31,7 @@ const serverMock = vi.hoisted(() => ({
 }));
 vi.mock("./services/server", () => ({ default: serverMock }));
 
-import { afterLanguage, getNetworkAddresses, initialState, openedAtRestore, renderState, SyncFailed, SyncFromServer, SyncInProgress } from "./setup";
+import { afterLanguage, App, getNetworkAddresses, initialState, openedAtRestore, renderState, SyncFailed, SyncFromServer, SyncInProgress } from "./setup";
 
 type Stats = { outstandingPullCount: number; totalPullCount: number | null; initialized: boolean; lastSyncError?: string | null };
 
@@ -98,6 +98,19 @@ describe("the unlock screen, as the wizard renders it", () => {
         // Transparent to layout, so the page it wraps fills the frame rather than sitting in a box
         // of the width setup.css gives every other form.
         expect(c.querySelector("form.setup-unlock-form")).not.toBeNull();
+    });
+});
+
+describe("setup shell", () => {
+    it("separates studio signal from active setup stage", async () => {
+        window.glob.setupAuthRequired = undefined;
+        window.glob.syncInProgress = undefined;
+        window.glob.setupTargetScreen = undefined;
+        const c = renderInto(<App />);
+        await flushEffects();
+
+        expect(c.querySelector(".entry-signal[aria-hidden=true]")).not.toBeNull();
+        expect(c.querySelector(".setup-stage .page.select-language")).not.toBeNull();
     });
 });
 

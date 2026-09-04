@@ -1,88 +1,82 @@
 #site-header {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
-
-
- /* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 27px; /* 32 */
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--text-primary);;
-  transition: 0.4s;
-    border-radius: 34px;
-}
-
-.slider::before {
-  position: absolute;
-  content: "";
-  height: 19px; /* 26px */
-  width: 19px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: 0.4s;
-    border-radius: 50%;
-    z-index: 2;
-}
-
-input:checked + .slider {
-  background-color: var(--background-highlight);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px var(--background-highlight);
-}
-
-input:checked + .slider:before {
-  transform: translateX(33px); /* whole width - slider width - 8px padding*/
-}
-
 
 .theme-selection {
     display: flex;
     align-items: center;
-   justify-content: space-between;
+    justify-content: space-between;
+    color: var(--text-menu);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
-.theme-selection label {
+.switch {
     position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 44px;
 }
 
-.dark-icon, .light-icon {
-    display: flex;
-    opacity: 0;
-    transition: opacity 400ms ease, color 400ms ease;
-    pointer-events: none;
+.switch input {
     position: absolute;
-    top: 0;
+    width: 100%;
     height: 100%;
-    width: 24px;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
 }
 
-/*     input ~ .dark-icon {
-    display: none;
-} */
+.slider {
+    position: absolute;
+    inset: 8px 0;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: #303643;
+    pointer-events: none;
+    transition: background-color 140ms ease;
+}
+
+.slider::before {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    width: 18px;
+    height: 18px;
+    background: #ffffff;
+    content: "";
+    transition: transform 140ms ease;
+}
+
+input:checked + .slider {
+    background: var(--background-active);
+}
+
+input:focus-visible + .slider {
+    outline: 3px solid #8facff;
+    outline-offset: 3px;
+}
+
+input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.dark-icon,
+.light-icon {
+    position: absolute;
+    top: 10px;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+}
 
 input:not(:checked) ~ .light-icon {
     opacity: 1;
@@ -92,43 +86,49 @@ input:checked ~ .dark-icon {
     opacity: 1;
 }
 
-/*     input:checked ~ .light-icon {
-    display: none;
-} */
-
-
 .dark-icon {
-    left: 5px;
-    color: var(--text-primary);
+    left: 2px;
+    color: #ffffff;
 }
 
 .light-icon {
-    right: 5px;
-    color: var(--background-highlight);
+    right: 2px;
+    color: #ffffff;
 }
 
-
 .search-item {
+    position: relative;
     display: flex;
     align-items: center;
-    position: relative;
 }
 
 .search-input {
-    color: var(--text-primary);
-    background: var(--background-highlight);
-    outline: 0;
-    border: 0;
     flex: 1;
-    padding: 5px 5px 5px 32px;
-    width: 200px;
-    border-radius: 6px;
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 2px;
+    padding: 0.55rem 0.6rem 0.55rem 2.35rem;
+    outline: 0;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font: inherit;
+}
+
+.search-input::placeholder {
+    color: #aeb7c8;
+}
+
+.search-input:focus {
+    border-color: #8facff;
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .search-icon {
-    display: flex;
-    color: var(--text-primary);
     position: absolute;
-    width: 20px;
-    left: 5px;
+    left: 0.7rem;
+    display: flex;
+    width: 17px;
+    color: #aeb7c8;
+    pointer-events: none;
 }

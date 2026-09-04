@@ -451,7 +451,10 @@
     "toggle-navigation": "Toggle Navigation",
     "toggle-toc": "Toggle Table of Contents",
     "logo-alt": "Logo",
-    "login": "Login"
+    "login": "Login",
+    "no-search-results": "No results found",
+    "search-error": "Search is unavailable. Try again.",
+    "home": "Home"
   },
   "hidden_subtree_templates": {
     "text-snippet": "Text Snippet",
