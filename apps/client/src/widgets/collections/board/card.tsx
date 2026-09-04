@@ -10,8 +10,9 @@ import { ContextMenuEvent } from "../../../menus/context_menu";
 import { openNoteContextMenu } from "./context_menu";
 import { t } from "../../../services/i18n";
 import UserAttributesDisplay from "../../attribute_widgets/UserAttributesList";
+import { FLIP_SETTLE_MS } from "../../react/flip";
 import {
-    useNoteColorClass, useNoteIcon, useNoteLabelBoolean, useTriliumEvent
+    useNoteColorClass, useNoteIcon, useNoteLabel, useNoteLabelBoolean, useTriliumEvent
 } from "../../react/hooks";
 
 function Card({
@@ -59,6 +60,7 @@ function Card({
     const editorRef = useRef<HTMLInputElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
     const [ isArchived ] = useNoteLabelBoolean(note, "archived");
+    const [ iconClass, setIconClass ] = useNoteLabel(note, "iconClass");
     // The card stays the one just made until another is, so what has already been shown is
     // remembered here rather than played again by every redraw of the column.
     const [ isRevealed, setIsRevealed ] = useState(false);
@@ -120,9 +122,9 @@ function Card({
         setTitle(note.title);
     }, [ note ]);
 
-    // A new card can be below the fold on a full column. One at the end takes the column to its
-    // end, so it lands clear of the fade the scrolling body draws over its bottom edge; one
-    // inserted between others is only brought into view.
+    // A new card can be out of sight on a full column. A card at either end scrolls its column to
+    // that end, clear of the fade `useScrollFade` draws over the edges; one between others is only
+    // scrolled into view.
     useLayoutEffect(() => {
         if (!isNew) {
             return;
@@ -134,11 +136,22 @@ function Card({
             return;
         }
 
-        if (card.nextElementSibling) {
-            card.scrollIntoView?.({ block: "nearest" });
-        } else {
-            content.scrollTop = content.scrollHeight;
-        }
+        const bring = () => {
+            if (!card.nextElementSibling) {
+                content.scrollTop = content.scrollHeight;
+            } else if (!card.previousElementSibling) {
+                content.scrollTop = 0;
+            } else {
+                card.scrollIntoView?.({ block: "nearest" });
+            }
+        };
+
+        bring();
+        // Again once the growth has finished: a card scrolled to while `useFlip` is still opening
+        // it out is measured against a shorter column, and ends up past the edge.
+        const settled = window.setTimeout(bring, FLIP_SETTLE_MS);
+
+        return () => window.clearTimeout(settled);
     }, [ isNew ]);
 
     return (
@@ -179,6 +192,11 @@ function Card({
                     }}
                     dismiss={() => api.dismissEditingTitle()}
                     mode="multiline"
+                    icon={{
+                        current: icon ?? "",
+                        onSelect: setIconClass,
+                        onReset: iconClass ? () => setIconClass(null) : undefined
+                    }}
                 />
             )}
         </div>

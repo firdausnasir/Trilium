@@ -2,7 +2,8 @@ import { h, render } from "preact";
 import { act } from "preact/test-utils";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import contextMenu, { ContextMenuEvent } from "../../../menus/context_menu";
+import type { CommandNames } from "../../../components/app_context";
+import contextMenu, { ContextMenuEvent, MenuItem } from "../../../menus/context_menu";
 import branches from "../../../services/branches";
 import dialog from "../../../services/dialog";
 import FNote from "../../../entities/fnote";
@@ -32,7 +33,8 @@ describe("Board column context menu", () => {
         api: BoardApi,
         column: {
             value?: string, color?: string, archived?: boolean, collapsed?: boolean,
-            canRename?: boolean, columns?: string[], index?: number, nested?: boolean
+            keepCollapsed?: boolean, isCollapsed?: boolean, canRename?: boolean,
+            columns?: string[], index?: number, nested?: boolean
         } = {},
         callbacks: {
             onEditTitle?: () => void,
@@ -40,7 +42,8 @@ describe("Board column context menu", () => {
             onAddColumn?: (direction: "before" | "after") => void,
             onMoveColumn?: (toIndex: number) => void,
             onSetLimit?: () => void,
-            onCollapse?: (collapsed: boolean) => void
+            onCollapse?: (collapsed: boolean) => void,
+            onKeepCollapsed?: (keepCollapsed: boolean) => void
         } = {}
     ) {
         const show = vi.spyOn(contextMenu, "show").mockImplementation(async () => {});
@@ -64,7 +67,8 @@ describe("Board column context menu", () => {
             onAddColumn: callbacks.onAddColumn ?? (() => {}),
             onMoveColumn: callbacks.onMoveColumn ?? (() => {}),
             onSetLimit: callbacks.onSetLimit ?? (() => {}),
-            onCollapse: callbacks.onCollapse ?? (() => {})
+            onCollapse: callbacks.onCollapse ?? (() => {}),
+            onKeepCollapsed: callbacks.onKeepCollapsed ?? (() => {})
         });
 
         // The spy outlives one call, so it is the menu just opened that is read back.
@@ -119,13 +123,26 @@ describe("Board column context menu", () => {
         expect(api.setColumnArchived).toHaveBeenLastCalledWith("To Do", false);
     });
 
-    /** One entry that carries the state, rather than two that swap places under the pointer. */
-    it("offers one collapse entry, checked while the column is collapsed", () => {
+    /** Collapsing is what the entry does; whether the column stays collapsed is the other one. */
+    it("collapses the column, and offers nothing to collapse while it is a strip", () => {
         const onCollapse = vi.fn();
-        const entryOf = (collapsed: boolean) => {
-            const found = openMenu({} as BoardApi, { collapsed }, { onCollapse }).find(item =>
-                item && "uiIcon" in item && item.uiIcon === "bx bx-collapse-horizontal");
-            if (!found || !("handler" in found)) throw new Error("expected a collapse entry");
+        const entry = openMenu({} as BoardApi, {}, { onCollapse }).find(item =>
+            item && "uiIcon" in item && item.uiIcon === "bx bx-collapse-horizontal");
+        if (!entry || !("handler" in entry)) throw new Error("expected a collapse entry");
+
+        entry.handler?.(entry, {} as never);
+        expect(onCollapse).toHaveBeenLastCalledWith(true);
+
+        expect(openMenu({} as BoardApi, { isCollapsed: true }).some(item =>
+            item && "uiIcon" in item && item.uiIcon === "bx bx-collapse-horizontal")).toBe(false);
+    });
+
+    it("carries the keep-collapsed state, and reports the entry as checked", () => {
+        const onKeepCollapsed = vi.fn();
+        const entryOf = (keepCollapsed: boolean) => {
+            const found = openMenu({} as BoardApi, { keepCollapsed }, { onKeepCollapsed })
+                .find(item => item && "uiIcon" in item && item.uiIcon === "bx bx-lock-alt");
+            if (!found || !("handler" in found)) throw new Error("expected a keep entry");
             return found;
         };
 
@@ -133,12 +150,12 @@ describe("Board column context menu", () => {
         const unchecked = entryOf(false);
         expect("trailingIcon" in unchecked && unchecked.trailingIcon).toBeUndefined();
         unchecked.handler?.(unchecked, {} as never);
-        expect(onCollapse).toHaveBeenLastCalledWith(true);
+        expect(onKeepCollapsed).toHaveBeenLastCalledWith(true);
 
         const checked = entryOf(true);
         expect("trailingIcon" in checked && checked.trailingIcon).toBe("bx bx-check");
         checked.handler?.(checked, {} as never);
-        expect(onCollapse).toHaveBeenLastCalledWith(false);
+        expect(onKeepCollapsed).toHaveBeenLastCalledWith(false);
     });
 
     /** The strip has no title to edit, so the menu does not offer to edit one either. */
@@ -152,7 +169,7 @@ describe("Board column context menu", () => {
         expect(icons(true)).toContain("bx bx-edit-alt");
         expect(icons(false)).not.toContain("bx bx-edit-alt");
         // Everything else the menu offers is still there.
-        expect(icons(false)).toContain("bx bx-collapse-horizontal");
+        expect(icons(false)).toContain("bx bx-lock-alt");
         expect(icons(false)).toContain("bx bx-trash");
     });
 
@@ -205,7 +222,7 @@ describe("Board column context menu", () => {
         const titled = openMenu({} as BoardApi).filter(item => item && "uiIcon" in item);
         expect(titled.map(item => "uiIcon" in item ? item.uiIcon : undefined))
             .toEqual([
-                "bx bx-edit-alt", "bx bx-collapse-horizontal", "bx bx-tachometer",
+                "bx bx-edit-alt", "bx bx-collapse-horizontal", "bx bx-lock-alt", "bx bx-tachometer",
                 "bx bx-plus", "bx bx-link",
                 "bx bx-columns", "bx bx-horizontal-left", "bx bx-archive", "bx bx-trash"
             ]);
@@ -377,6 +394,25 @@ describe("Board item context menu", () => {
     afterEach(() => vi.restoreAllMocks());
 
 
+    /** The same editor F2 opens, for a reader who came to the card with the mouse. */
+    it("opens the card's title editor", () => {
+        const api = {
+            columns: [],
+            isColumnArchived: () => false,
+            getColumnIcon: () => DEFAULT_COLUMN_ICON,
+            getColumnColorClass: () => "",
+            startEditing: vi.fn()
+        } as unknown as BoardApi;
+
+        const entry = openItemMenu(api).find(item =>
+            item && "uiIcon" in item && item.uiIcon === "bx bx-rename");
+        if (!entry || !("handler" in entry)) throw new Error("expected an edit-title entry");
+        expect("shortcut" in entry && entry.shortcut).toBe("F2");
+
+        entry.handler?.(entry, {} as never);
+        expect(api.startEditing).toHaveBeenCalledWith("branchId");
+    });
+
     it("inserts a card on either side of the one it was opened on", () => {
         const api = {
             columns: [],
@@ -395,6 +431,41 @@ describe("Board item context menu", () => {
 
         expect(vi.mocked(api.insertRowAtPosition).mock.calls.map(call => call[2]))
             .toEqual([ "before", "after" ]);
+    });
+
+    /** Where Ctrl+Home sends it, for a reader who reached the card with the mouse. */
+    it("sends a card to the head of its column, and keeps the focus on it", () => {
+        const api = {
+            columns: [],
+            isColumnArchived: () => false,
+            getColumnIcon: () => DEFAULT_COLUMN_ICON,
+            getColumnColorClass: () => "",
+            moveToColumnStart: vi.fn(async () => {})
+        } as unknown as BoardApi;
+        const focusCard = vi.fn();
+
+        const entry = openItemMenu(api, "To Do", focusCard).find(item =>
+            item && "uiIcon" in item && item.uiIcon === "bx bx-vertical-top");
+        if (!entry || !("handler" in entry)) throw new Error("expected a move-to-top entry");
+        expect("shortcut" in entry && entry.shortcut).toBe("Ctrl+Home");
+
+        entry.handler?.(entry, {} as never);
+        expect(api.moveToColumnStart).toHaveBeenCalledWith(
+            expect.any(String), "branchId", "To Do");
+        expect(focusCard).toHaveBeenCalled();
+    });
+
+    it("says nothing about moving up the card already at the head", () => {
+        const api = {
+            columns: [],
+            isColumnArchived: () => false,
+            getColumnIcon: () => DEFAULT_COLUMN_ICON,
+            getColumnColorClass: () => "",
+            isFirstInColumn: () => true
+        } as unknown as BoardApi;
+
+        expect(openItemMenu(api).some(item =>
+            item && "uiIcon" in item && item.uiIcon === "bx bx-vertical-top")).toBe(false);
     });
 
     it("copies a card into the board, after the one it was made from", async () => {
@@ -436,6 +507,55 @@ describe("Board item context menu", () => {
         expect(deleteNotes).toHaveBeenCalledWith([ "branchId" ], false, false);
     });
 
+    /**
+     * A board can hold more columns than a menu has screen to stand in, so what does not fit goes
+     * behind one entry. The card's own column is listed whatever its place, since the check beside
+     * it is what says where the card stands.
+     */
+    it("lists seven columns and puts the rest behind an entry of their own", () => {
+        const columns = [ "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine" ];
+        const api = {
+            columns,
+            isColumnArchived: () => false,
+            getColumnIcon: () => DEFAULT_COLUMN_ICON,
+            getColumnColorClass: () => "",
+            changeColumn: vi.fn()
+        } as unknown as BoardApi;
+
+        const listed = statusItems(api, "One");
+        expect(names(listed.slice(0, -1))).toEqual(columns.slice(0, 7).map(boxed));
+
+        // Named by its icon: `t()` answers with nothing here, i18next never being initialised.
+        const more = listed.at(-1);
+        if (!more || !("items" in more) || !more.items) throw new Error("expected a more entry");
+        expect("uiIcon" in more && more.uiIcon).toBe("bx bx-dots-horizontal-rounded");
+        expect(names(more.items)).toEqual([ "Eight", "Nine" ].map(boxed));
+
+        // The card is in the ninth column, which stands in the menu itself along with the first
+        // seven, and is gone from what the entry holds.
+        const withNinth = statusItems(api, "Nine");
+        expect(names(withNinth.slice(0, -1)))
+            .toEqual([ ...columns.slice(0, 7), "Nine" ].map(boxed));
+        const rest = withNinth.at(-1);
+        if (!rest || !("items" in rest) || !rest.items) throw new Error("expected a more entry");
+        expect(names(rest.items)).toEqual([ "Eight" ].map(boxed));
+
+        // Seven of them fit as they are.
+        expect(names(statusItems({ ...api, columns: columns.slice(0, 7) } as BoardApi, "One")))
+            .toEqual(columns.slice(0, 7).map(boxed));
+    });
+
+    /** The titles the menu shows, each name boxed in the span the stylesheet sizes. */
+    function names(items: MenuItem<unknown>[]) {
+        return items.flatMap(item =>
+            item && "title" in item && item.title ? [ item.title ] : []);
+    }
+
+    /** A name as the menu writes it, which is what `names` reads back. */
+    function boxed(name: string) {
+        return `<span class="board-column-name">${name}</span>`;
+    }
+
     /** Opens the menu a card offers, and hands back what it was given to show. */
     function openItemMenu(api: BoardApi, column = "To Do", focusCard = vi.fn()) {
         const show = vi.spyOn(contextMenu, "show").mockImplementation(async () => {});
@@ -449,7 +569,12 @@ describe("Board item context menu", () => {
         // Every item menu asks what the board calls its grouping field; a test says so only when
         // that is what it is about.
         const withDefaults = Object.assign(
-            { getStatusLabel: () => "Status", getColumnTitle: (name: string) => name }, api);
+            {
+                getStatusLabel: () => "Status",
+                getColumnTitle: (name: string) => name,
+                isFirstInColumn: () => false
+            },
+            api);
         openNoteContextMenu(
             withDefaults, event, buildNote({ title: "Card" }) as FNote, "branchId", column,
             focusCard, () => {});

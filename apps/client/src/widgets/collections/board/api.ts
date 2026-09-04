@@ -20,6 +20,9 @@ import {
 } from "./columns";
 import { ColumnMap } from "./data";
 
+/** Which end of a column a new card is made at. */
+export type CardPlacement = "top" | "bottom";
+
 /** One write's claim on a column, held until that write lands or is taken back. */
 interface ColumnClaim {
     /**
@@ -125,8 +128,7 @@ export default class BoardApi {
      * Points the api at the board as it now stands.
      *
      * A refresh calls this instead of building a new api, so that the object every card holds keeps
-     * its identity and a move redraws only the cards whose position changed. What the api works out
-     * for itself, such as {@link sentToColumnEnd}, is kept.
+     * its identity and a move redraws only the cards whose position changed.
      */
     update(
         byColumn: ColumnMap | undefined,
@@ -138,6 +140,13 @@ export default class BoardApi {
         setBranchIdToEdit: (branchId: string | undefined) => void,
         statusDefinition?: BoardStatusDefinition
     ) {
+        // What was sent to the end of a column stands in for what the map does not show yet, so it
+        // is given up with the map it stands in for. Kept across a refresh, it would name a branch
+        // that is no longer last and put the next card before it.
+        if (byColumn !== this.byColumn) {
+            this.sentToColumnEnd.clear();
+        }
+
         this.byColumn = byColumn;
         this.columns = columns;
         this.parentNote = parentNote;
@@ -154,13 +163,37 @@ export default class BoardApi {
         this.statusAttribute = statusAttribute.replace(/^[~#]/, "");
     }
 
-    async createNewItem(column: string, title: string) {
+    /**
+     * Creates a card at one end of a column.
+     *
+     * Cards are drawn in the order the board's children stand in, so a card created under the
+     * board lands at the bottom. The top is created before the column's own first card: all
+     * columns share one list of children, so the board's first child is not this column's.
+     */
+    async createNewItem(
+        column: string, title: string, placement: CardPlacement = "bottom", icon?: string
+    ) {
+        const first = placement === "top"
+            ? this.byColumn?.get(column)?.[0]?.branch.branchId
+            : undefined;
+
         try {
             const { note } = await note_create.createNote(this.parentNote.noteId, {
                 activate: false,
                 title,
                 isProtected: this.parentNote.isProtected,
-                attributes: this.groupingFor(column)
+                attributes: [
+                    ...this.groupingFor(column),
+                    ...(icon
+                        ? [ {
+                            type: "label" as const,
+                            name: "iconClass",
+                            value: icon,
+                            isInheritable: false
+                        } ]
+                        : [])
+                ],
+                ...(first ? { target: "before", targetBranchId: first } : {})
             });
 
             return note?.noteId;
@@ -255,7 +288,12 @@ export default class BoardApi {
         return this.removeFromBoard(noteId);
     }
 
-    async addNewColumn(columnName: string) {
+    /**
+     * Adds a column at one end of the board.
+     *
+     * @param atStart whether it goes at the head of the board rather than after the last column.
+     */
+    async addNewColumn(columnName: string, atStart = false, icon?: string) {
         if (!columnName.trim()) {
             return;
         }
@@ -265,7 +303,30 @@ export default class BoardApi {
         // Add the new column to persisted data if it doesn't exist
         if (columns.some(col => col.value === columnName)) return false;
         settleColumn(this.pending, columnName);
-        this.storeColumns([ ...columns, { value: columnName } ]);
+
+        // The icon goes in with the column rather than after it: a write of its own would be a
+        // second refresh of the board for a column that has only just been drawn.
+        const added: BoardColumnData = icon ? { value: columnName, icon } : { value: columnName };
+
+        if (!atStart) {
+            this.storeColumns([ ...columns, added ]);
+            return true;
+        }
+
+        // The whole order has to be written for the column to stand before the others: the stored
+        // list is what the board reads first, and a column missing from it keeps its derived place
+        // at the end whatever is put in front. The inbox holds the head where it has one.
+        const order = columns.map(col => col.value);
+        for (const derived of this.columns) {
+            if (!order.includes(derived)) {
+                order.push(derived);
+            }
+        }
+
+        const byValue = new Map(columns.map(col => [ col.value, col ]));
+        const placed: BoardColumnData[] = order.map(value => byValue.get(value) ?? { value });
+        placed.splice(order[0] === INBOX_COLUMN ? 1 : 0, 0, added);
+        this.storeColumns(placed);
         return true;
     }
 
@@ -350,18 +411,26 @@ export default class BoardApi {
             return;
         }
 
-        const noteIds = this.byColumn?.get(oldValue)?.map(item => item.note.noteId) || [];
+        // One write, which the server makes over the cards, the stored columns and the definition
+        // together. Renaming them from here one at a time leaves a window in which they disagree,
+        // and another client reading the board during it resolves the old name back from whichever
+        // of them still carries it and writes that back, undoing the rename.
+        const renamed = await this.retiredWhile(oldValue, newValue, () =>
+            server.put<{ config?: BoardViewData }>(
+                `notes/${this.parentNote.noteId}/board/rename-column`, {
+                    attribute: this.statusAttribute,
+                    isRelation: this.isRelationMode,
+                    oldValue,
+                    newValue
+                }));
 
-        // Change the value in the notes.
-        const action: BulkAction = this.isRelationMode
-            ? { name: "updateRelationTarget", relationName: this.statusAttribute, targetNoteId: newValue }
-            : { name: "updateLabelValue", labelName: this.statusAttribute, labelValue: newValue };
-        await this.retiredWhile(oldValue, newValue,
-            () => executeBulkActions(noteIds, [ action ], { silent: true }));
-
-        // Rename the column in the persisted data.
-        this.storeColumns((this.viewConfig?.columns ?? [])
-            .map(col => col.value === oldValue ? { ...col, value: newValue } : col));
+        // Taken from the answer rather than waited for: until the change arrives, this still holds
+        // the configuration it read before the rename, and a refresh landing in between would write
+        // that back and bring the old name with it.
+        if (renamed?.config) {
+            this.viewConfig = renamed.config;
+            this.viewConfigSource = renamed.config;
+        }
     }
 
     /** Stores the icon a column shows, or clears it back to the default when given nothing. */
@@ -439,11 +508,22 @@ export default class BoardApi {
     }
 
     /**
-     * Hides the inbox column by turning off the board's setting. The stored entry is kept, so
-     * its icon, colour and position are restored when it is switched back on.
+     * Whether the board keeps an inbox column. The stored entry outlives being switched off, so
+     * its icon, colour and position come back with it.
      */
+    async setInboxEnabled(enabled: boolean) {
+        await attributes.setBooleanWithInheritance(
+            this.parentNote, "enableInboxColumn", enabled);
+    }
+
+    /** Hides the inbox column, which is what its own menu offers. */
     async disableInbox() {
-        await attributes.setBooleanWithInheritance(this.parentNote, "enableInboxColumn", false);
+        await this.setInboxEnabled(false);
+    }
+
+    /** Whether the board draws the notes filed as archived, cards and columns alike. */
+    async setArchivedShown(shown: boolean) {
+        await attributes.setBooleanWithInheritance(this.parentNote, "includeArchived", shown);
     }
 
     /** The note limit set for a column, absent if disabled. */
@@ -485,6 +565,58 @@ export default class BoardApi {
     }
 
     /**
+     * Collapses every column, or opens the ones that are not kept collapsed.
+     *
+     * One write for the board: a column resolved from the definition or from a value its cards
+     * carry is drawn without ever having been stored, so this is also where it gets an entry.
+     */
+    async setAllColumnsCollapsed(collapsed: boolean) {
+        const stored = new Map((this.viewConfig?.columns ?? []).map(col => [ col.value, col ]));
+        const order = [ ...stored.keys() ];
+        for (const derived of this.columns) {
+            if (!stored.has(derived)) {
+                order.push(derived);
+            }
+        }
+
+        this.storeColumns(order.map(value => {
+            const column = { ...(stored.get(value) ?? { value }) };
+            if (collapsed) {
+                column.collapsed = true;
+            } else if (!column.keepCollapsed) {
+                // A column kept collapsed keeps the flag: opening it is what the peek is for.
+                delete column.collapsed;
+            }
+
+            return column;
+        }));
+    }
+
+    /** Whether a column collapses again once it has been opened. */
+    isColumnKeptCollapsed(column: string) {
+        return !!this.viewConfig?.columns?.find(col => col.value === column)?.keepCollapsed;
+    }
+
+    /**
+     * Sets whether a column collapses again once it has been opened.
+     *
+     * Turning it on collapses the column as well, so that the entry does something the reader can
+     * see rather than only deciding what happens the next time the column is opened.
+     *
+     * @param isOpen whether the column is drawn open. Turning the flag off then clears `collapsed`
+     *               as well, so the column the reader is looking at stays open.
+     */
+    async setColumnKeepCollapsed(column: string, keepCollapsed: boolean, isOpen = false) {
+        if (keepCollapsed) {
+            this.updateColumn(column, { keepCollapsed: true, collapsed: true });
+            return;
+        }
+
+        this.updateColumn(column,
+            isOpen ? { keepCollapsed: false, collapsed: false } : { keepCollapsed: false });
+    }
+
+    /**
      * Writes properties onto a column, dropping each one given as nothing so that it goes back to
      * its default rather than being stored empty.
      *
@@ -499,14 +631,32 @@ export default class BoardApi {
             if (!updated.color) delete updated.color;
             if (!updated.archived) delete updated.archived;
             if (!updated.collapsed) delete updated.collapsed;
+            if (!updated.keepCollapsed) delete updated.keepCollapsed;
             if (!updated.displayName) delete updated.displayName;
             if (!updated.limit) delete updated.limit;
             return updated;
         };
 
-        this.storeColumns(columns.some(col => col.value === column)
-            ? columns.map(col => col.value === column ? patched(col) : col)
-            : [ ...columns, patched({ value: column }) ]);
+        if (columns.some(col => col.value === column)) {
+            this.storeColumns(columns.map(col => col.value === column ? patched(col) : col));
+            return;
+        }
+
+        // A column with no entry yet is written where the board draws it, after the last column
+        // before it that has one. Appended, it would move to the end of the board the moment
+        // anything was picked for it: the stored order is what the board reads first, and a column
+        // with no entry keeps a place of its own only until it has one. The inbox is drawn at the
+        // head without ever having been written, so collapsing it used to send it to the back.
+        const drawn = this.columns.indexOf(column);
+        const previous = drawn < 0 ? undefined : this.columns.slice(0, drawn).reverse()
+            .find(value => columns.some(col => col.value === value));
+        const at = drawn < 0
+            ? columns.length
+            : previous ? columns.findIndex(col => col.value === previous) + 1 : 0;
+
+        const placed = [ ...columns ];
+        placed.splice(at, 0, patched({ value: column }));
+        this.storeColumns(placed);
     }
 
     reorderColumn(fromIndex: number, toIndex: number) {
@@ -836,6 +986,27 @@ export default class BoardApi {
         }
 
         this.sentToColumnEnd.set(targetColumn, branchId);
+    }
+
+    /** Whether a card stands at the head of its column, with nowhere left to be moved up to. */
+    isFirstInColumn(branchId: string, column: string) {
+        return this.byColumn?.get(column)?.[0]?.branch.branchId === branchId;
+    }
+
+    /**
+     * Moves a card to the head of the column it stands in, where Ctrl+Home also sends it.
+     *
+     * The card's own place is looked up here rather than asked of the caller: the menu is opened on
+     * a card, which knows the column it is in but not where it stands among the others.
+     */
+    async moveToColumnStart(noteId: string, branchId: string, column: string) {
+        const items = this.byColumn?.get(column) ?? [];
+        const at = items.findIndex(item => item.branch.branchId === branchId);
+        if (at <= 0) {
+            return;
+        }
+
+        await this.moveWithinBoard(noteId, branchId, at, 0, column, column);
     }
 
     async moveWithinBoard(noteId: string, sourceBranchId: string, sourceIndex: number, targetIndex: number, sourceColumn: string, targetColumn: string) {
