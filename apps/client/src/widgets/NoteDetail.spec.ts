@@ -8,7 +8,7 @@ import froca from "../services/froca";
 // global the test env doesn't provide. The pure function under test never touches the tree, so stub it.
 vi.mock("./note_tree", () => ({ default: class {} }));
 
-import { getExtendedWidgetType, isContextInActiveTab } from "./NoteDetail";
+import { checkFullHeight, getExtendedWidgetType, isContextInActiveTab } from "./NoteDetail";
 
 const FAKE_NOTE_ID = "blob-stub-note";
 
@@ -100,5 +100,36 @@ describe("getExtendedWidgetType blob-stub routing", () => {
         const note = fakeNote({ type: "launcher", getBlob });
         expect(await getExtendedWidgetType(note, fakeContext())).toBe("doc");
         expect(getBlob).not.toHaveBeenCalled();
+    });
+});
+
+describe("checkFullHeight", () => {
+    function fakeContext(overrides: Record<string, unknown> = {}): NoteContext {
+        return {
+            noteId: "note",
+            viewScope: {},
+            hasNoteList: () => false,
+            ...overrides
+        } as unknown as NoteContext;
+    }
+
+    it("fills the canvas for interactive viewers and editors", () => {
+        const context = fakeContext();
+
+        expect(checkFullHeight(context, "image")).toBe(true);
+        expect(checkFullHeight(context, "editableCode")).toBe(true);
+        expect(checkFullHeight(context, "spreadsheet")).toBe(true);
+    });
+
+    it("keeps document content in flow and lets a sibling note list own canvas height", () => {
+        expect(checkFullHeight(fakeContext(), "readOnlyText")).toBe(false);
+        expect(checkFullHeight(fakeContext({ hasNoteList: () => true }), "image")).toBe(false);
+    });
+
+    it("fills attachment views regardless of their flow mapping", () => {
+        const context = fakeContext({ viewScope: { viewMode: "attachments" } });
+
+        expect(checkFullHeight(context, "attachmentList")).toBe(true);
+        expect(checkFullHeight(context, "attachmentDetail")).toBe(true);
     });
 });

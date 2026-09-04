@@ -1,22 +1,21 @@
 #toc-pane {
-    display: flex;
-    flex-direction: column;
-    height: fit-content;
     position: sticky;
     top: 0;
-    order: 3;
-    transition: width 0.3s ease, margin-right 0.3s ease;
-    width: 250px;
+    order: 2;
     flex-shrink: 0;
+    width: 224px;
     max-height: 100vh;
+    border-inline-start: 1px solid var(--border);
+    padding: clamp(5rem, 9vw, 9rem) 1.25rem 2rem;
     overflow-y: auto;
-    padding-top: 20px;
-    z-index: 1;
     background: var(--background-primary);
+    transition: width 180ms ease, padding 180ms ease;
 }
 
 .toc-pane-collapsed #toc-pane {
     width: 0;
+    border: 0;
+    padding-inline: 0;
     overflow: hidden;
 }
 
@@ -26,78 +25,63 @@
 }
 
 #toc-pane h3 {
+    margin: 0 0 1.25rem;
+    color: var(--attention);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
+}
+
+#toc,
+#toc ul {
+    list-style: none;
 }
 
 #toc {
     position: relative;
-    height: fit-content;
-    margin: 0;
-    border-radius: 6px;
-    padding: 0 0 0 16px;
     max-width: 100%;
-}
-
-#toc, #toc ul {
-    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 #toc ul {
-    padding-left: 16px;
+    padding-inline-start: 0.75rem;
 }
 
 #toc span {
-    text-overflow: ellipsis;
-    overflow: hidden;
     display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #toc li a {
-/*         position: relative; */
     display: flex;
     align-items: center;
-    color: var(--text-heading);
-    transition: color 200ms ease;
-    white-space: nowrap;
+    border-inline-start: 2px solid transparent;
+    padding: 0.35rem 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.73rem;
+    line-height: 1.4;
+    text-decoration: none;
 }
 
 #toc li a:hover,
 #toc li a.active {
+    border-inline-start-color: var(--text-link);
     color: var(--text-link);
     text-decoration: none;
 }
 
-#toc li a::before {
-    content: "";
-    display: flex;
-    position: absolute;
-    width: 2px;
-    height: 16px;
-    background: transparent;
-    left: 0;
-    transition: background-color 200ms ease;
+#content :is(h1, h2, h3, h4, h5, h6) a.toc-anchor {
+    float: inline-start;
+    width: 1rem;
+    margin-inline-start: -1.25rem;
+    color: var(--text-link);
+    opacity: 0;
 }
 
-#toc li a.active::before {
-    background: var(--text-link);
-}
-
-#toc::before {
-    content: "";
-    display: block;
-    position: absolute;
-    left: 0px;
-    top: 4px;
-    width: 2px;
-    height: calc(100% - 8px);
-    background: var(--background-highlight);
-}
-
-#content h1 a.toc-anchor,
-#content h2 a.toc-anchor,
-#content h3 a.toc-anchor,
-#content h4 a.toc-anchor,
-#content h5 a.toc-anchor,
-#content h6 a.toc-anchor {
-    margin-left: 10px;
+#content :is(h1, h2, h3, h4, h5, h6):hover a.toc-anchor,
+#content :is(h1, h2, h3, h4, h5, h6) a.toc-anchor:focus-visible {
+    opacity: 1;
 }

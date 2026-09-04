@@ -29,9 +29,7 @@ This method is used when you already have a sync server and want to configure a 
 1.  **Desktop Setup**: Follow the [desktop installation page](Desktop%20Installation.md).
 2.  **Initial Configuration**: When prompted, choose the option to set up sync with a sync server.
 
-![screenshot of the sync from server setup page](Synchronization_sync-init.png)
-
-1.  **Server Details**: Configure the Trilium server address and enter the correct username and password for authentication.
+1.  **Server Details**: Enter the Trilium server address and password. If required, you can also enter an optional proxy server.
 2.  **Finish Setup**: Click the "Finish setup" button. If successful, you will see the following screen:
 
 ![screenshot of the sync page](Synchronization_sync-in-progress.png)

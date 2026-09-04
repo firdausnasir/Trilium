@@ -43,8 +43,8 @@
 }
 
 .note-detail-relation-map .connection-label.jtk-hover,
-.jtk-source-hover,
-.jtk-target-hover {
+.note-detail-relation-map .jtk-source-hover,
+.note-detail-relation-map .jtk-target-hover {
     background-color: var(--more-accented-background-color);
 }
 

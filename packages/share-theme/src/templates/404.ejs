@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= locale %>" dir="<%= direction %>">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="../favicon.ico">
     <title><%= t("share_404.title") %></title>
+    <style>
+        :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+        body { display: grid; min-height: 100vh; margin: 0; place-items: center; background: #20242d; color: #fff; }
+        main { box-sizing: border-box; width: min(80vw, 680px); border-top: 5px solid #ff7669; padding: 3rem; background: #292e38; }
+        h1 { margin: 0; font-size: clamp(2.5rem, 8vw, 6rem); letter-spacing: -.05em; line-height: 1; }
+    </style>
 </head>
 <body>
-    <h1><%= t("share_404.heading") %></h1>
+    <main><h1><%= t("share_404.heading") %></h1></main>
 </body>
 </html>

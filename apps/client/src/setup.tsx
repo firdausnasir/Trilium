@@ -89,7 +89,7 @@ export function renderState(state: State, setState: (state: State) => void) {
     }
 }
 
-function App() {
+export function App() {
     // A sync that already created the schema but was interrupted before finishing
     // resumes straight on the progress screen instead of restarting the wizard.
     const resuming = window.glob.syncInProgress === true;
@@ -108,13 +108,24 @@ function App() {
     }, [resuming]);
 
     return (
-        <div class="setup-container">
+        <div class="setup-container knowledge-studio-entry-container">
             <div class="drag-region" />
-
-            <SlidePages current={state} order={STATE_ORDER}>
-                {(page) => renderState(page, setState)}
-            </SlidePages>
+            <EntrySignal />
+            <div class="setup-stage">
+                <SlidePages current={state} order={STATE_ORDER}>
+                    {(page) => renderState(page, setState)}
+                </SlidePages>
+            </div>
         </div>
+    );
+}
+
+function EntrySignal() {
+    return (
+        <aside class="entry-signal" aria-hidden="true">
+            <img src={logo} alt="" />
+            <div class="entry-signal-lines"><span /><span /><span /></div>
+        </aside>
     );
 }
 

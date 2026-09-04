@@ -1,6 +1,7 @@
 import "./mobile_layout.css";
 
 import type AppContext from "../components/app_context.js";
+import { isExperimentalFeatureEnabled } from "../services/experimental_features.js";
 import GlobalMenuWidget from "../widgets/buttons/global_menu.js";
 import CloseZenModeButton from "../widgets/close_zen_button.js";
 import NoteList from "../widgets/collections/NoteList.jsx";
@@ -30,26 +31,27 @@ import { applyModals } from "./layout_commons.js";
 
 export default class MobileLayout {
     getRootWidget(appContext: typeof AppContext) {
+        const isNewLayout = isExperimentalFeatureEnabled("new-layout");
+        const rootClassName = isNewLayout
+            ? "horizontal-layout knowledge-studio-mobile-shell"
+            : "horizontal-layout";
         const rootContainer = new RootContainer(true)
             .setParent(appContext)
-            .class("horizontal-layout")
+            .class(rootClassName)
             .child(new FlexContainer("column").id("mobile-sidebar-container"))
             .child(
                 new FlexContainer("row")
                     .filling()
                     .id("mobile-rest-container")
+                    .class("knowledge-studio-mobile-stage")
                     .child(
                         new SidebarContainer("tree", "column")
                             .class("d-md-flex d-lg-flex d-xl-flex col-12 col-sm-5 col-md-4 col-lg-3 col-xl-3")
                             .id("mobile-sidebar-wrapper")
-                            .css("max-height", "100%")
-                            .css("padding-inline-start", "0")
-                            .css("padding-inline-end", "0")
-                            .css("contain", "content")
                             .child(
                                 new FlexContainer("column")
                                     .filling()
-                                    .id("mobile-sidebar-wrapper")
+                                    .class("knowledge-studio-mobile-navigation")
                                     .child(new QuickSearchWidget())
                                     .child(<MobileNoteNavigator />)
                             )
@@ -61,11 +63,11 @@ export default class MobileLayout {
                             .child(
                                 new SplitNoteContainer(() =>
                                     new NoteWrapperWidget()
+                                        .class("knowledge-studio-mobile-note")
                                         .child(
                                             new FlexContainer("row")
-                                                .class("title-row note-split-title")
+                                                .class("title-row note-split-title knowledge-studio-mobile-note-bar")
                                                 .contentSized()
-                                                .css("align-items", "center")
                                                 .child(<ToggleSidebarButton />)
                                                 .child(<NoteIconWidget />)
                                                 .child(<NoteTitleWidget />)
@@ -76,6 +78,7 @@ export default class MobileLayout {
                                             new ScrollingContainer()
                                                 .filling()
                                                 .contentSized()
+                                                .class("knowledge-studio-mobile-content")
                                                 .child(<InlineTitle />)
                                                 .child(<NoteTitleActions />)
                                                 .child(<NoteDetail />)
@@ -93,9 +96,9 @@ export default class MobileLayout {
                 new FlexContainer("column")
                     .contentSized()
                     .id("mobile-bottom-bar")
+                    .class("knowledge-studio-mobile-dock")
                     .child(new FlexContainer("row")
                         .class("horizontal")
-                        .css("height", "53px")
                         .child(<LauncherContainer isHorizontalLayout />)
                         .child(<GlobalMenuWidget isHorizontalLayout />)
                         .id("launcher-pane"))

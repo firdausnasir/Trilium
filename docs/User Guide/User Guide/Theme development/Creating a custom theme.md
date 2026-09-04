@@ -17,13 +17,14 @@ As such, the first step is to create a new note to gather all the themes.
 
 ## Step 3. Define the theme's CSS
 
-As a very simple example we will change the background color of the launcher pane to a shade of blue.
+This example changes the launcher background in both vertical and horizontal orientations.
 
-To alter the different variables of the theme:
+These orientation-specific variables are provided by the Next theme. Add `#appThemeBase=next` before using them; a legacy-based custom theme must use variables supported by its selected base theme.
 
 ```css
-:root {
-	--launcher-pane-background-color: #0d6efd;
+#trilium-app {
+    --launcher-pane-vert-background-color: #0d6efd;
+    --launcher-pane-horiz-background-color: #0d6efd;
 }
 ```
 

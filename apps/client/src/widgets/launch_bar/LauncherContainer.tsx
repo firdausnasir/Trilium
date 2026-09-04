@@ -1,3 +1,5 @@
+import "./LauncherContainer.css";
+
 import { useCallback, useLayoutEffect, useRef, useState } from "preact/hooks";
 
 import FNote from "../../entities/fnote";
@@ -26,11 +28,9 @@ export default function LauncherContainer({ isHorizontalLayout }: { isHorizontal
         <div
             ref={containerRef}
             id="launcher-container"
-            style={{
-                display: "flex",
-                flexGrow: 1,
-                flexDirection: isHorizontalLayout ? "row" : "column"
-            }}
+            className={isHorizontalLayout
+                ? "launcher-container-horizontal"
+                : "launcher-container-vertical"}
             onWheel={isHorizontalLayout ? (e) => {
                 if ((e.target as HTMLElement).closest(".dropdown-menu")) return;
                 onWheelHorizontalScroll(e);

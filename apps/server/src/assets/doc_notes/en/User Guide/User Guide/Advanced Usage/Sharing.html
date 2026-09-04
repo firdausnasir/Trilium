@@ -173,7 +173,7 @@ class="image">
     <li><strong>Static Note Tree</strong>
     </li>
     <li><strong>Protected Notes</strong>: Cannot be shared.</li>
-    <li><strong>Include Notes</strong>: Not supported.</li>
+    <li><strong>Include Notes</strong>: Included notes must also be shared.</li>
   </ul>
   <p>Some of these limitations may be addressed in future updates.</p>
   <h2>Prerequisites</h2>
@@ -183,17 +183,19 @@ class="image">
   <h2>Sharing a note</h2>
   <ol>
     <li>
-      <p><strong>Enable Sharing</strong>: To share a note, toggle the <code spellcheck="false">Shared</code> switch
-        within the note's interface. Once sharing is enabled, an URL will appear,
-        which you can click to access the shared note.</p>
+      <p><strong>Enable Sharing</strong>: In the <a class="reference-link" href="#root/_help_IjZS7iK5EXtb">New Layout</a>,
+        open <a class="reference-link" href="#root/_help_8YBEPzcpUgxw">Note actions</a> and
+        turn on <em>Shared</em>. In the Classic layout, open <em>Basic Properties</em> and
+        use the <em>Shared</em> switch.</p>
       <p>
         <img src="Sharing_share-single-note.png" alt="Share Note">
       </p>
     </li>
     <li>
-      <p><strong>Access the Shared Note</strong>: The link provided will open the
-        note in your browser. If your server is not configured with a public IP,
-        the URL will refer to <code spellcheck="false">localhost (127.0.0.1)</code>.</p>
+      <p><strong>Access the Shared Note</strong>: In the New Layout, use the share
+        badge beside the note title to copy the URL or open the public page. In
+        the Classic layout, use the URL shown in Basic Properties. If your server
+        is not configured with a public address, the URL will refer to <code spellcheck="false">localhost (127.0.0.1)</code>.</p>
     </li>
   </ol>
   <h2>Sharing a note subtree</h2>
@@ -452,9 +454,9 @@ for (const attr of parentNote.attributes) {
       </table>
     </figure>
     <h3>Customizing logo</h3>
-    <p>It's possible to adjust the logo which is displayed on the top-left of
-      the left pane.</p>
-    <figure class="table">
+    <p>It is possible to adjust the logo displayed in the public page masthead.</p>
+    <figure
+    class="table">
       <table>
         <thead>
           <tr>
@@ -490,47 +492,40 @@ for (const attr of parentNote.attributes) {
           </tr>
         </tbody>
       </table>
-    </figure>
-    <h3>Customizing OpenGraph</h3>
-    <figure class="table">
-      <table>
-        <thead>
-          <tr>
-            <th>Attribute</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code spellcheck="false">#shareOpenGraphColor</code>
-            </td>
-            <td>This adjusts the <code spellcheck="false">theme-color</code> meta-property.</td>
-          </tr>
-          <tr>
-            <td><code spellcheck="false">#shareOpenGraphURL</code>
-            </td>
-            <td>This adjusts the <code spellcheck="false">og:url</code> and <code spellcheck="false">twitter:url</code> meta-properties.</td>
-          </tr>
-          <tr>
-            <td><code spellcheck="false">#shareOpenGraphDomain</code>
-            </td>
-            <td>Adjusts the <code spellcheck="false">twitter:domain</code> meta-property.</td>
-          </tr>
-          <tr>
-            <td><code spellcheck="false">#shareOpenGraphImage</code>&nbsp;
-              <br><code spellcheck="false">~shareOpenGraphImage</code>
-            </td>
-            <td>Can be either a label, case in which the value is passed on as-is, or
-              it can be a relation to an image&nbsp;<a class="reference-link" href="#root/_help_W8vYD3Q1zjCR">File</a>.
-              This controls the <code spellcheck="false">og:image</code> meta-property.</td>
-          </tr>
-        </tbody>
-      </table>
-    </figure>
-    <h2>Credits</h2>
-    <p>Since v0.95.0, a new theme was introduced (and enabled by default) which
-      greatly improves the visual aspect of the Share feature, as well as its
-      functionality (such as mobile support, dark/light mode, collapsible tree,
-      etc.). This theme is an adaptation of the <a href="https://github.com/zerebos/trilium.rocks">Trilium Rocks!</a> by
-      <a
-      href="https://github.com/zerebos">zerebos</a>.</p>
+      </figure>
+      <h3>Customizing OpenGraph</h3>
+      <figure class="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Attribute</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code spellcheck="false">#shareOpenGraphColor</code>
+              </td>
+              <td>This adjusts the <code spellcheck="false">theme-color</code> meta-property.</td>
+            </tr>
+            <tr>
+              <td><code spellcheck="false">#shareOpenGraphURL</code>
+              </td>
+              <td>This adjusts the <code spellcheck="false">og:url</code> and <code spellcheck="false">twitter:url</code> meta-properties.</td>
+            </tr>
+            <tr>
+              <td><code spellcheck="false">#shareOpenGraphDomain</code>
+              </td>
+              <td>Adjusts the <code spellcheck="false">twitter:domain</code> meta-property.</td>
+            </tr>
+            <tr>
+              <td><code spellcheck="false">#shareOpenGraphImage</code>&nbsp;
+                <br><code spellcheck="false">~shareOpenGraphImage</code>
+              </td>
+              <td>Can be either a label, case in which the value is passed on as-is, or
+                it can be a relation to an image&nbsp;<a class="reference-link" href="#root/_help_W8vYD3Q1zjCR">File</a>.
+                This controls the <code spellcheck="false">og:image</code> meta-property.</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>

@@ -24,6 +24,9 @@
 
     --main-font-family: "Inter", sans-serif;
 
+    --ks-display-font-family: var(--main-font-family);
+    --ks-metadata-font-family: JetBrainsLight, var(--monospace-font-family);
+
     --main-font-size: normal;
 
     --tree-font-family: var(--main-font-family);

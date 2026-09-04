@@ -11,3 +11,10 @@
     overflow: hidden;
     height: 100%;
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .note-detail-image .image-viewer-content img,
+    .note-detail-image .image-viewer-viewport {
+        transition: none;
+    }
+}

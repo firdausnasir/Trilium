@@ -158,6 +158,13 @@ describe("login App — SSO branch", () => {
         expect(hrefSpy).toHaveBeenCalledWith("/authenticate");
     });
 
+    it("keeps provider action inside focused entry stage", () => {
+        const c = renderInto(<App />);
+
+        expect(c.querySelector(".entry-signal[aria-hidden=true]")).not.toBeNull();
+        expect(c.querySelector(".login-stage .page.login .oidc-login")).not.toBeNull();
+    });
+
     it("shows the one-shot SSO error when present", () => {
         window.glob.login = { ssoEnabled: true, ssoIssuerName: "Google", totpEnabled: false, ssoError: "wrong_account" };
         const c = renderInto(<App />);

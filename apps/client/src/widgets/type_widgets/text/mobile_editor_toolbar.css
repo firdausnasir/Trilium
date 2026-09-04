@@ -4,10 +4,12 @@ body.mobile {
     }
 
     .classic-toolbar-outer-container.visible {
-        height: 38px;
+        height: 46px;
         position: relative;
         overflow: visible;
         flex-shrink: 0;
+        border-top: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 15%, transparent);
+        background: var(--ks-shell-color);
     }
 
     .classic-toolbar-widget {
@@ -15,8 +17,8 @@ body.mobile {
         bottom: 0;
         inset-inline-start: 0;
         inset-inline-end: 0;
-        height: 38px;
-        overflow: scroll;
+        height: 46px;
+        overflow: auto hidden;
         display: flex;
         align-items: flex-end;
         user-select: none;
@@ -38,14 +40,33 @@ body.mobile {
     }
 
     .classic-toolbar-widget .ck.ck-toolbar {
-        --ck-color-toolbar-background: var(--main-background-color);
+        --ck-color-toolbar-background: var(--ks-shell-color, var(--main-background-color));
         --ck-color-button-default-background: transparent;
         --ck-color-button-default-disabled-background: transparent;
+        --ck-color-button-default-hover-background: var(--ks-shell-raised-color, var(--hover-item-background-color));
+        --ck-color-button-on-background: var(--ks-primary-color, var(--active-item-background-color));
+        --ck-color-button-default-color: var(--ks-on-shell-color, var(--main-text-color));
+        min-height: 44px;
         position: absolute;
         border: none;
+        border-radius: 0;
+        padding-inline: max(3px, env(safe-area-inset-left)) max(3px, env(safe-area-inset-right));
+    }
+
+    .classic-toolbar-widget .ck.ck-button {
+        min-width: 44px;
+        min-height: 44px;
     }
 
     .classic-toolbar-widget .ck.ck-button.ck-disabled {
         opacity: 0.3;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.mobile .classic-toolbar-widget,
+    body.mobile .classic-toolbar-widget * {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
     }
 }

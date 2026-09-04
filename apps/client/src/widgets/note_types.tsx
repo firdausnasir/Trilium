@@ -14,7 +14,7 @@ import { TypeWidgetProps } from "./type_widgets/type_widget";
  */
 export type ExtendedNoteType = Exclude<NoteType, "launcher" | "text" | "code" | "llmChat"> | "empty" | "readOnlyCode" | "readOnlyText" | "editableText" | "editableCode" | "attachmentDetail" | "attachmentList" |  "protectedSession" | "sqlConsole" | "markdown" | "iconPack" | "llmChat" | "blobStub";
 
-export type TypeWidget = ((props: TypeWidgetProps) => VNode | JSX.Element | undefined);
+export type TypeWidget = (props: TypeWidgetProps) => VNode | JSX.Element | undefined;
 type NoteTypeView = () => (Promise<{ default: TypeWidget } | TypeWidget> | TypeWidget);
 
 interface NoteTypeMapping {
@@ -22,153 +22,168 @@ interface NoteTypeMapping {
     printable?: boolean;
     /** The class name to assign to the note type wrapper */
     className: string;
-    isFullHeight?: boolean;
+    /** Whether the widget consumes the canvas or flows in its scrolling container. */
+    layout: "flow" | "full-height";
 }
 
 export const TYPE_MAPPINGS: Record<ExtendedNoteType, NoteTypeMapping> = {
     empty: {
         view: () => import("./type_widgets/Empty"),
         className: "note-detail-empty",
+        layout: "flow",
         printable: true
     },
     doc: {
         view: () => import("./type_widgets/Doc"),
         className: "note-detail-doc",
+        layout: "flow",
         printable: true
     },
     search: {
         view: () => (props: TypeWidgetProps) => <></>,
         className: "note-detail-none",
+        layout: "flow",
         printable: true
     },
     protectedSession: {
         view: () => import("./type_widgets/ProtectedSession"),
         className: "protected-session-password-component",
-        isFullHeight: true
+        layout: "full-height"
     },
     blobStub: {
         view: () => import("./type_widgets/BlobStub"),
-        className: "note-detail-blob-stub"
+        className: "note-detail-blob-stub",
+        layout: "flow"
     },
     book: {
         view: () => import("./type_widgets/Book"),
         className: "note-detail-book",
+        layout: "flow",
         printable: true,
     },
     contentWidget: {
         view: () => import("./type_widgets/ContentWidget"),
         className: "note-detail-content-widget",
+        layout: "flow",
         printable: true
     },
     webView: {
         view: () => import("./type_widgets/WebView"),
         className: "note-detail-web-view",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     file: {
         view: () => import("./type_widgets/File"),
         className: "note-detail-file",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     image: {
         view: () => import("./type_widgets/Image"),
         className: "note-detail-image",
+        layout: "full-height",
         printable: true
     },
     readOnlyCode: {
         view: async () => (await import("./type_widgets/code/Code")).ReadOnlyCode,
         className: "note-detail-readonly-code",
+        layout: "flow",
         printable: true
     },
     editableCode: {
         view: async () => (await import("./type_widgets/code/Code")).EditableCode,
         className: "note-detail-code",
+        layout: "full-height",
         printable: true
     },
     mermaid: {
         view: () => import("./type_widgets/mermaid/Mermaid"),
         className: "note-detail-mermaid",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     mindMap: {
         view: () => import("./type_widgets/mind_map/MindMap"),
         className: "note-detail-mind-map",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     attachmentList: {
         view: async () => (await import("./type_widgets/Attachment")).AttachmentList,
         className: "attachment-list",
+        layout: "flow",
         printable: true
     },
     attachmentDetail: {
         view: async () => (await import("./type_widgets/Attachment")).AttachmentDetail,
         className: "attachment-detail",
+        layout: "flow",
         printable: true
     },
     readOnlyText: {
         view: () => import("./type_widgets/text/ReadOnlyText"),
-        className: "note-detail-readonly-text"
+        className: "note-detail-readonly-text",
+        layout: "flow"
     },
     editableText: {
         view: () => import("./type_widgets/text/EditableText"),
         className: "note-detail-editable-text",
+        layout: "flow",
         printable: true
     },
     render: {
         view: () => import("./type_widgets/Render"),
         className: "note-detail-render",
+        layout: "flow",
         printable: true
     },
     canvas: {
         view: () => import("./type_widgets/canvas/Canvas"),
         className: "note-detail-canvas",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     relationMap: {
         view: () => import("./type_widgets/relation_map/RelationMap"),
         className: "note-detail-relation-map",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     noteMap: {
         view: () => import("./type_widgets/NoteMap"),
         className: "note-detail-note-map",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     sqlConsole: {
         view: () => import("./type_widgets/SqlConsole"),
         className: "sql-console-widget-container",
-        isFullHeight: true
+        layout: "full-height"
     },
     markdown: {
         view: () => import("./type_widgets/markdown/Markdown"),
         className: "note-detail-markdown",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     iconPack: {
         view: () => import("./type_widgets/icon_pack/IconPack"),
         className: "note-detail-icon-pack",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     spreadsheet: {
         view: () => import("./type_widgets/spreadsheet/Spreadsheet"),
         className: "note-detail-spreadsheet",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     },
     llmChat: {
         view: () => import("./type_widgets/llm_chat/LlmChat"),
         className: "note-detail-llm-chat",
         printable: true,
-        isFullHeight: true
+        layout: "full-height"
     }
 };
 

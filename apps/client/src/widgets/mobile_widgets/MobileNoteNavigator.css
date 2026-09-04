@@ -1,34 +1,37 @@
 .mobile-note-navigator {
     display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
     min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    background: var(--ks-surface-muted-color, var(--main-background-color));
     contain: content;
 }
 
 .mobile-navigator-toolbar {
     display: flex;
+    min-height: 45px;
     align-items: center;
-    gap: 8px;
-    padding: 4px 6px;
-    background: var(--main-background-color);
+    gap: 6px;
+    border-bottom: 1px solid var(--ks-hairline-color, var(--main-border-color));
+    padding: 2px 6px;
+    background: var(--ks-surface-muted-color, var(--main-background-color));
 }
 
 .mobile-navigator-hoisted-badge {
-    flex: 0 1 auto;
+    --badge-radius: var(--ks-radius-small, 2px);
+    --color: var(--ks-primary-soft-color, var(--input-background-color));
     min-width: 0;
-    margin-inline-start: auto;
-    margin-inline-end: 4px;
-    --badge-radius: 12px;
-    --color: var(--input-background-color);
+    min-height: 30px;
+    flex: 0 1 auto;
+    margin-inline: auto 4px;
     color: var(--main-text-color);
 }
 
 .mobile-navigator-hoisted-badge .text {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 4px;
-    min-width: 0;
 }
 
 .mobile-navigator-hoisted-title {
@@ -41,28 +44,33 @@
 .mobile-navigator-hoisted-close {
     flex: 0 0 auto;
     font-size: 1.3em;
-    opacity: 0.6;
+    opacity: 0.65;
 }
 
 .mobile-navigator-back {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 40px;
-    padding: 6px 10px 6px 4px;
-    background: none;
-    border: none;
-    color: var(--main-text-color);
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
     max-width: 100%;
+    min-height: 44px;
+    align-items: center;
+    gap: 3px;
+    border: 0;
+    border-radius: var(--ks-radius-small, 2px);
+    padding: 5px 10px 5px 3px;
+    background: transparent;
+    color: var(--main-text-color);
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-navigator-back:is(:hover, :focus-visible) {
+    background: var(--ks-primary-soft-color, var(--hover-item-background-color));
 }
 
 .mobile-navigator-back:disabled {
     cursor: default;
-    opacity: 0.6;
+    opacity: 0.55;
 }
 
 .mobile-navigator-back.invisible {
@@ -75,22 +83,22 @@
 }
 
 .mobile-navigator-back-title {
+    min-width: 0;
     flex: 1 1 auto;
     overflow: hidden;
+    text-align: start;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: start;
 }
 
 .mobile-navigator-scroll {
     position: relative;
     flex: 1 1 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
+    overflow: hidden auto;
     overscroll-behavior: contain;
     padding-bottom: env(safe-area-inset-bottom, 0);
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mobile-navigator-scroll.is-pending .mobile-navigator-body {
@@ -103,110 +111,107 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8em;
     color: var(--muted-text-color, var(--main-text-color));
+    font-size: 1.8em;
     pointer-events: none;
 }
 
 .mobile-navigator-current-tile {
     display: flex;
+    min-height: 116px;
     flex-direction: column;
-    gap: 10px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--main-border-color);
+    gap: 9px;
+    border-bottom: 1px solid var(--ks-hairline-color, var(--main-border-color));
+    border-inline-start: 3px solid transparent;
+    padding: 15px 14px 16px 13px;
+    background: var(--ks-surface-color, var(--main-background-color));
+    color: var(--main-text-color);
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    color: var(--main-text-color);
+}
+
+.mobile-navigator-current-tile:is(:hover, :focus-visible) {
+    border-inline-start-color: var(--ks-primary-color, var(--active-item-border-color));
+    outline: none;
 }
 
 .mobile-navigator-current-tile:active {
-    filter: brightness(0.95);
+    background: var(--ks-primary-soft-color, var(--hover-item-background-color));
 }
 
-.mobile-navigator-current-tile.is-archived {
-    opacity: 0.7;
+.mobile-navigator-current-tile.is-active {
+    border-inline-start-color: var(--ks-primary-color, var(--active-item-border-color));
 }
 
-.mobile-navigator-children-label {
-    padding: 14px 16px 6px;
-    font-size: 0.75em;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted-text-color, var(--main-text-color));
-    opacity: 0.7;
+.mobile-navigator-current-tile.is-archived,
+.mobile-navigator-row.is-archived {
+    opacity: 0.6;
 }
 
 .mobile-navigator-current-header {
     display: flex;
+    min-height: 44px;
     align-items: center;
-    gap: 10px;
-    min-height: 32px;
+    gap: 9px;
 }
 
 .mobile-navigator-current-icon {
     flex: 0 0 auto;
-    font-size: 1.3em;
+    color: var(--ks-primary-color, inherit);
+    font-size: 1.35em;
 }
 
 .mobile-navigator-current-title {
+    min-width: 0;
     flex: 1 1 auto;
     overflow: hidden;
+    font-size: 1.12rem;
+    font-weight: 650;
+    letter-spacing: -.02em;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 1.15em;
-    font-weight: 600;
 }
 
 .mobile-navigator-current-action {
-    flex: 0 0 auto;
     display: inline-flex;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    border: 0;
+    border-radius: var(--ks-radius-small, 2px);
     padding: 0;
-    border: none;
-    border-radius: 50%;
     background: transparent;
     color: inherit;
-    font-size: 1.2em;
     cursor: pointer;
+    font-size: 1.2em;
     -webkit-tap-highlight-color: transparent;
 }
 
-.mobile-navigator-current-action:active {
-    background: var(--hover-item-background-color);
+.mobile-navigator-current-action:is(:hover, :focus-visible, :active) {
+    background: var(--ks-primary-soft-color, var(--hover-item-background-color));
 }
 
 .mobile-navigator-current-preview {
     position: relative;
-    font-size: 0.92em;
-    line-height: 1.35;
     color: var(--muted-text-color, var(--main-text-color));
+    font-size: .88rem;
+    line-height: 1.5;
     pointer-events: none;
 }
 
-/* Constrain height on the inner `.note-book-content` itself — that's the element
-   watched by the shared `contentSizeObserver`, so `scrollHeight > clientHeight`
-   there is what toggles `note-book-content-overflowing`. */
 .mobile-navigator-current-preview .note-book-content {
-    max-height: 140px;
+    max-width: 100%;
+    max-height: 126px;
     overflow: hidden;
 }
 
-/* Hide stale content during the brief window between commit and the new content
-   being rendered into the DOM, so the preview doesn't flash the previous note's
-   content before the new one arrives. */
 .mobile-navigator-current-preview .note-book-content:not(.note-book-content-ready) {
     visibility: hidden;
 }
 
-/* Mirror NoteList's approach: a mask gradient applied only when
-   `.note-book-content-overflowing` is toggled on by the shared
-   `contentSizeObserver` in ListOrGridView.tsx (scrollHeight > clientHeight).
-   This fades the bottom only when the preview is actually truncated. */
 .mobile-navigator-current-preview .note-book-content.note-book-content-overflowing {
     mask-image: linear-gradient(to bottom, black calc(100% - 32px), transparent 100%);
     mask-repeat: no-repeat;
@@ -214,24 +219,25 @@
 }
 
 .mobile-navigator-current-preview:empty,
-.mobile-navigator-current-preview .note-book-content:empty {
-    display: none;
-}
-
-/* Collapse the whole preview (and its flex gap) when the rendered content is empty,
-   so pure folders don't show a blank row beneath the title. */
+.mobile-navigator-current-preview .note-book-content:empty,
 .mobile-navigator-current-tile:has(.note-book-content-ready:empty) .mobile-navigator-current-preview {
     display: none;
 }
 
-.mobile-navigator-current-preview .note-book-content {
-    max-width: 100%;
-}
-
-.mobile-navigator-current-preview img,
-.mobile-navigator-current-preview video {
+.mobile-navigator-current-preview :is(img, video) {
     max-width: 100%;
     height: auto;
+}
+
+.mobile-navigator-children-label {
+    border-bottom: 1px solid var(--ks-hairline-color, var(--main-border-color));
+    padding: 15px 16px 7px;
+    color: var(--muted-text-color, var(--main-text-color));
+    font-family: var(--monospace-font-family);
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .075em;
+    text-transform: uppercase;
 }
 
 .mobile-navigator-list {
@@ -241,32 +247,29 @@
 
 .mobile-navigator-row {
     display: flex;
+    min-height: 52px;
     align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--main-border-color);
+    gap: 11px;
+    border-bottom: 1px solid var(--ks-hairline-color, var(--main-border-color));
+    border-inline-start: 3px solid transparent;
+    padding: 7px 12px 7px 13px;
     color: var(--main-text-color);
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 
-.mobile-navigator-row:active {
-    background: var(--hover-item-background-color);
+.mobile-navigator-row:is(:hover, :focus-visible, :active) {
+    background: var(--ks-primary-soft-color, var(--hover-item-background-color));
+    outline: none;
 }
 
 .mobile-navigator-row.is-active {
-    border-inline-start: 3px solid var(--main-text-color);
-    padding-inline-start: 11px;
+    border-inline-start-color: var(--ks-primary-color, var(--active-item-border-color));
+    background: color-mix(in srgb, var(--ks-primary-soft-color, var(--hover-item-background-color)) 70%, transparent);
+    font-weight: 650;
 }
 
-.mobile-navigator-row.is-archived {
-    opacity: 0.55;
-}
-
-/* Colored notes: `--custom-color` is set by the theme on `.use-note-color`
-   (see css_class_manager.createClassForColor). Apply it to the title/icon. */
 .mobile-navigator-row.use-note-color .mobile-navigator-row-title,
 .mobile-navigator-row.use-note-color .mobile-navigator-row-icon,
 .mobile-navigator-current-tile.use-note-color .mobile-navigator-current-title,
@@ -283,39 +286,53 @@
     width: 1px;
     height: 1px;
     overflow: hidden;
+    visibility: hidden;
     clip-path: inset(50%);
     pointer-events: none;
-    visibility: hidden;
 }
 
 .mobile-navigator-row-icon {
     flex: 0 0 auto;
+    color: var(--muted-text-color);
     font-size: 1.2em;
 }
 
 .mobile-navigator-row-title {
+    min-width: 0;
     flex: 1 1 auto;
     overflow: hidden;
+    font-size: .94rem;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 1em;
 }
 
 .mobile-navigator-row-chevron {
     flex: 0 0 auto;
-    font-size: 1.4em;
-    opacity: 0.5;
+    font-size: 1.35em;
+    opacity: 0.45;
 }
 
 .mobile-navigator-row-hidden-badge {
+    min-width: 1.65em;
     flex: 0 0 auto;
-    min-width: 1.6em;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: var(--accented-background-color, var(--hover-item-background-color));
-    color: var(--muted-text-color, var(--main-text-color));
-    font-size: 0.75em;
+    border-radius: var(--ks-radius-small, 2px);
+    padding: 3px 6px;
+    background: var(--ks-primary-soft-color, var(--accented-background-color));
+    color: var(--main-text-color);
+    font-family: var(--monospace-font-family);
+    font-size: .68rem;
     font-weight: 600;
-    text-align: center;
     line-height: 1.2;
+    text-align: center;
+}
+
+body[dir="rtl"] .mobile-navigator-back-icon,
+body[dir="rtl"] .mobile-navigator-row-chevron {
+    transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-note-navigator * {
+        scroll-behavior: auto !important;
+    }
 }

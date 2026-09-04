@@ -95,6 +95,12 @@ body.desktop .note-detail-split .note-detail-code-editor {
     opacity: 0.5;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .note-detail-split .note-detail-split-preview {
+        transition: none;
+    }
+}
+
 /* Horizontal layout */
 
 .note-detail-split.split-horizontal:not(.split-read-only) {

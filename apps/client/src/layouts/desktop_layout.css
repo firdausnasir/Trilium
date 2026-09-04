@@ -1,0 +1,365 @@
+body.desktop #root-widget.knowledge-studio-shell {
+    --knowledge-studio-bar-height: 46px;
+    --knowledge-studio-rail-size: 46px;
+    background: var(--ks-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar {
+    height: var(--knowledge-studio-bar-height) !important;
+    min-height: var(--knowledge-studio-bar-height);
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 16%, transparent);
+    padding-inline: 8px 6px;
+    background: var(--ks-shell-color) !important;
+    color: var(--ks-on-shell-color);
+    -webkit-app-region: drag;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar > *:not(.tab-row-widget),
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-row-widget > *:not(.tab-row-filler) {
+    -webkit-app-region: no-drag;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading {
+    flex: 0 1 340px;
+    min-width: 208px;
+    max-width: 340px;
+    height: 100%;
+    align-items: center;
+    gap: 2px;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .global-menu,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .global-menu-button,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .toggle-button {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    margin: 0 !important;
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .global-menu-button:is(:hover, .show),
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .toggle-button:hover {
+    background: var(--ks-shell-raised-color) !important;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .quick-search {
+    flex: 1 1 220px;
+    min-width: 140px;
+    height: 34px;
+    padding: 2px 4px;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .quick-search::before {
+    border-color: color-mix(in srgb, var(--ks-on-shell-color) 22%, transparent);
+    background: var(--ks-shell-raised-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .quick-search :is(input, .search-button) {
+    color: var(--ks-on-shell-color) !important;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .quick-search input::placeholder {
+    color: color-mix(in srgb, var(--ks-on-shell-color) 62%, transparent);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-history-navigation-buttons {
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-row-widget {
+    min-width: 160px;
+    height: var(--knowledge-studio-bar-height) !important;
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-row-widget > * {
+    margin-top: 5px;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .note-tab .note-tab-wrapper {
+    top: 0;
+    height: 36px !important;
+    border: 1px solid transparent;
+    background: var(--workspace-tab-background-color, transparent);
+    color: color-mix(in srgb, var(--ks-on-shell-color) 68%, transparent);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .note-tab:hover .note-tab-wrapper {
+    background: var(--workspace-tab-background-color, var(--ks-shell-raised-color));
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .note-tab[active] .note-tab-wrapper {
+    border-color: color-mix(in srgb, var(--ks-on-shell-color) 12%, transparent);
+    border-top-color: var(--ks-primary-color);
+    background: var(--workspace-tab-background-color, var(--ks-surface-muted-color));
+    color: var(--main-text-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .note-new-tab,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-scroll-button-left,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar .tab-scroll-button-right,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace-bar > .right-pane-toggle-button {
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell.vertical-layout #launcher-pane.vertical {
+    width: var(--knowledge-studio-rail-size) !important;
+    min-width: var(--knowledge-studio-rail-size) !important;
+    border-inline-end: 1px solid color-mix(in srgb, var(--ks-on-shell-color) 12%, transparent);
+    background: var(--ks-shell-color);
+}
+
+body.desktop .knowledge-studio-shell.vertical-layout #launcher-pane.vertical #launcher-container {
+    width: var(--knowledge-studio-rail-size);
+    padding-block: 5px;
+}
+
+body.desktop
+    .knowledge-studio-shell.vertical-layout
+    #launcher-pane.vertical
+    :is(.launcher-button, .right-dropdown-widget) {
+    --launcher-pane-size: var(--knowledge-studio-rail-size);
+}
+
+body.desktop .knowledge-studio-shell.horizontal-layout #launcher-pane.horizontal {
+    --launcher-pane-size: 42px;
+    height: 42px !important;
+    min-height: 42px;
+    border-bottom: 1px solid var(--ks-hairline-color);
+    background: var(--ks-shell-raised-color);
+}
+
+body.desktop .knowledge-studio-shell.horizontal-layout #launcher-pane.horizontal .global-menu {
+    width: 42px;
+    height: 42px;
+}
+
+body.desktop .knowledge-studio-shell #horizontal-main-container {
+    min-height: 0;
+    background: var(--ks-canvas-color);
+}
+
+body.desktop .knowledge-studio-shell #left-pane {
+    min-width: 184px;
+    border-inline-end: 1px solid var(--ks-hairline-color);
+    background: var(--ks-surface-muted-color);
+}
+
+body.desktop .knowledge-studio-shell #left-pane .tree-wrapper {
+    border-top: 3px solid var(--ks-shell-raised-color);
+}
+
+body.desktop .knowledge-studio-shell #left-pane .tree {
+    padding: 10px 8px 46px;
+}
+
+body.desktop .knowledge-studio-shell #left-pane span.fancytree-node {
+    min-height: 30px;
+    padding-block: 4px;
+    border-inline-start: 2px solid transparent;
+}
+
+body.desktop .knowledge-studio-shell #left-pane span.fancytree-node.fancytree-active {
+    border-inline-start-color: var(--ks-primary-color);
+    background: var(--ks-primary-soft-color);
+    box-shadow: none;
+}
+
+body.desktop .knowledge-studio-shell #left-pane span.fancytree-node.fancytree-active::before {
+    display: none;
+}
+
+body.desktop .knowledge-studio-shell #left-pane .tree-actions {
+    bottom: 8px;
+    border-color: var(--ks-hairline-color);
+    background: var(--ks-surface-color);
+    box-shadow: none;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace,
+body.desktop .knowledge-studio-shell .knowledge-studio-main-stage {
+    min-width: 0;
+    min-height: 0;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-main-stage {
+    background: var(--ks-canvas-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-canvas {
+    min-width: 0;
+    padding: 10px 10px 8px 12px;
+    background: var(--ks-canvas-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-splits {
+    gap: 0;
+}
+
+body.desktop
+    .knowledge-studio-shell
+    .knowledge-studio-splits
+    > .note-split:not(.full-content-width)
+    > .scrolling-container {
+    --content-margin-inline: clamp(28px, 4vw, 64px);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-splits > .note-split {
+    border: 1px solid var(--ks-hairline-color);
+    border-radius: var(--ks-radius-large);
+    background-color: var(--note-split-background-color, var(--ks-surface-color));
+}
+
+body.desktop:not(.shadows-disabled) .knowledge-studio-shell .knowledge-studio-splits > .note-split {
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--modal-shadow-color) 18%, transparent);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-splits > .gutter {
+    background: var(--ks-canvas-color) !important;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-note-bar {
+    min-height: 43px;
+    border-bottom: 1px solid var(--ks-hairline-color);
+    padding-inline: 6px;
+    background: var(--ks-surface-color);
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-note-bar > * {
+    margin-block: 4px !important;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-note-bar .note-title-widget input {
+    font-size: 15px;
+    font-weight: 650;
+}
+
+body.desktop .knowledge-studio-shell .knowledge-studio-note-bar .note-badges {
+    --badge-radius: var(--ks-radius-small);
+    gap: 3px;
+}
+
+body.desktop .knowledge-studio-shell .inline-title {
+    width: min(100%, calc(var(--max-content-width) + 72px));
+    padding-block: clamp(28px, 5vh, 58px) 16px;
+    padding-inline: var(--content-margin-inline) 16px;
+}
+
+body.desktop .knowledge-studio-shell .inline-title > .inline-title-row {
+    align-items: flex-start;
+    gap: 18px;
+}
+
+body.desktop .knowledge-studio-shell .inline-title .note-title-widget {
+    --note-title-size: clamp(2rem, 3.2vw, 3.35rem);
+}
+
+body.desktop .knowledge-studio-shell .inline-title .note-title-widget input {
+    line-height: 1.05;
+}
+
+body.desktop .knowledge-studio-shell .inline-title .title-details {
+    margin-top: 9px;
+    color: var(--muted-text-color);
+    font-family: var(--monospace-font-family);
+    font-size: 0.72rem;
+    letter-spacing: 0.035em;
+    opacity: 0.78;
+}
+
+body.desktop .knowledge-studio-shell #right-pane-host:not(.peek) {
+    min-width: 258px;
+    margin-block: 10px 8px;
+    margin-inline-end: 4px;
+}
+
+body.desktop .knowledge-studio-shell #right-pane {
+    border: 1px solid var(--ks-hairline-color);
+    border-radius: var(--ks-radius-medium);
+    background: var(--ks-surface-muted-color);
+}
+
+body.desktop .knowledge-studio-shell #right-pane .right-pane-header {
+    height: 42px;
+    border-bottom-color: var(--ks-hairline-color);
+    background: var(--ks-shell-raised-color);
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell #right-pane .right-pane-tabs button {
+    color: color-mix(in srgb, var(--ks-on-shell-color) 68%, transparent);
+}
+
+body.desktop .knowledge-studio-shell #right-pane .right-pane-tabs button.active {
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell #right-pane .card {
+    border-bottom-color: var(--ks-hairline-color);
+    background: transparent;
+}
+
+body.desktop .knowledge-studio-shell #right-pane .card-header {
+    min-height: 38px;
+    padding-inline: 7px;
+}
+
+body.desktop .knowledge-studio-shell #right-pane .card-header-title {
+    color: var(--main-text-color);
+    font-family: var(--monospace-font-family);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+body.desktop .knowledge-studio-shell > .status-bar,
+body.desktop .knowledge-studio-shell .knowledge-studio-workspace > .status-bar {
+    border-top: 1px solid var(--ks-hairline-color);
+    background: var(--ks-shell-color);
+    color: color-mix(in srgb, var(--ks-on-shell-color) 74%, transparent);
+}
+
+body.desktop .knowledge-studio-shell .status-bar > .status-bar-main-row {
+    min-height: 26px;
+    background: transparent;
+    font-family: var(--monospace-font-family);
+    font-size: 0.72rem;
+}
+
+body.desktop .knowledge-studio-shell .status-bar > .status-bar-main-row .btn {
+    color: inherit;
+}
+
+body.desktop .knowledge-studio-shell .status-bar > .status-bar-main-row .btn:is(:hover, :focus, .active) {
+    background: var(--ks-shell-raised-color);
+    color: var(--ks-on-shell-color);
+}
+
+body.desktop .knowledge-studio-shell .save-status-badge.error,
+body.desktop .knowledge-studio-shell .sync-status-disconnected-with-changes {
+    color: var(--ks-attention-color);
+}
+
+body.desktop.motion-disabled .knowledge-studio-shell :is(.note-tab-wrapper, .fancytree-node, .right-pane-header) {
+    transition: none !important;
+}
+
+@media (max-width: 1100px) {
+    body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading {
+        flex-basis: 250px;
+        min-width: 180px;
+    }
+
+    body.desktop .knowledge-studio-shell .knowledge-studio-workspace-leading .quick-search {
+        min-width: 110px;
+    }
+
+    body.desktop .knowledge-studio-shell .inline-title {
+        padding-inline-start: 32px;
+    }
+}

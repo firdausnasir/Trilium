@@ -5,10 +5,11 @@ In Trilium, tabs allow easy switching between notes.
 
 ## Layout
 
-Depending on the <a class="reference-link" href="Vertical%20and%20horizontal%20layout.md">Vertical and horizontal layout</a>:
+Tab placement depends on both the interface and the selected orientation:
 
-*   For the vertical layout, the tabs will be placed at the top but to the right of the <a class="reference-link" href="Note%20Tree.md">Note Tree</a>.
-*   For the horizontal layout, the tabs will be placed at the top in full-width, above the [note tree](Note%20Tree.md), allowing for more tabs to be comfortably displayed.
+*   In the <a class="reference-link" href="New%20Layout.md">New Layout</a>, the workspace tab bar spans the full width above the note tree and note workspace in both orientations.
+*   In the Classic vertical layout, tabs appear at the top beside the <a class="reference-link" href="Note%20Tree.md">Note Tree</a>.
+*   In the Classic horizontal layout, tabs span the full width above the note tree.
 
 ## Interaction
 

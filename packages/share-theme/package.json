@@ -10,7 +10,7 @@
     "build-scripts": "esrun scripts/build.ts -- --module=scripts",
     "build-styles": "esrun scripts/build.ts -- --module=styles",
     "dist": "esrun scripts/build.ts -- --minify",
-    "test": "esrun src/scripts/test.ts"
+    "test": "pnpm build && vitest run"
   },
   "exports": {
     "./templates/*": "./src/templates/*",
@@ -32,10 +32,13 @@
   "devDependencies": {
     "@digitak/esrun": "3.2.26",
     "@triliumnext/ckeditor5": "workspace:*",
+    "@types/node": "24.13.3",
     "dotenv": "17.4.2",
     "esbuild": "0.28.2",
+    "happy-dom": "20.12.0",
     "highlight.js": "11.12.0",
     "sass": "1.103.1",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
   }
 }

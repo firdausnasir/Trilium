@@ -8,7 +8,7 @@ const themeRootEl = document.documentElement;
  */
 
 export default function setupThemeSelector() {
-    const themeSwitch: HTMLInputElement = document.querySelector(".theme-selection input")!;
+    const themeSwitch = document.querySelector<HTMLInputElement>(".theme-selection input");
     themeSwitch?.addEventListener("change", () => {
         const theme = themeSwitch.checked ? "dark" : "light";
         setTheme(theme);

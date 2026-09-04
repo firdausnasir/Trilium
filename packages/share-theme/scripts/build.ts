@@ -3,7 +3,7 @@ import path from "node:path";
 
 import dotenv from "dotenv";
 import * as esbuild from "esbuild";
-import { writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import * as sass from "sass";
@@ -74,6 +74,19 @@ const sassPlugin: esbuild.Plugin = {
     }
 };
 
+const fontLicensePlugin: esbuild.Plugin = {
+    name: "font-licenses",
+    setup(build) {
+        build.onEnd(() => {
+            const outputDir = path.join(rootDir, "dist");
+            mkdirSync(outputDir, { recursive: true });
+            for (const license of [ "Montserrat-OFL.txt", "JetBrainsMono-OFL.txt" ]) {
+                copyFileSync(path.join(rootDir, "src", "fonts", license), path.join(outputDir, license));
+            }
+        });
+    }
+};
+
 async function runBuild(watch: boolean) {
     const before = performance.now();
     const opts: esbuild.BuildOptions = {
@@ -94,7 +107,7 @@ async function runBuild(watch: boolean) {
             ".html": "text",
             ".css": "css"
         },
-        plugins: [sassPlugin],
+        plugins: [sassPlugin, fontLicensePlugin],
         logLevel: "info",
         metafile: true,
         minify: process.argv.includes("--minify")

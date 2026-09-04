@@ -64,6 +64,13 @@ body.interactive .ip-cell:hover {
                 background 150ms ease-in-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    body.interactive .ip-cell:hover {
+        transform: none;
+        transition: none;
+    }
+}
+
 .ip-glyph {
     font-family: "tn-icon-pack-preview";
     font-size: calc(var(--icon-size) * var(--icon-size-ratio));
@@ -73,7 +80,7 @@ body.interactive .ip-cell:hover {
 .ip-count {
     display: inline-block;
     position: absolute;
-    right: 0;
+    inset-inline-end: 0;
     bottom: 0;
     padding: 4px 8px;
     border-radius: 6px;
@@ -84,6 +91,6 @@ body.interactive .ip-cell:hover {
 
 body.interactive .ip-count {
     position: fixed;
-    right: 16px;
+    inset-inline-end: 16px;
     bottom: 8px;
 }

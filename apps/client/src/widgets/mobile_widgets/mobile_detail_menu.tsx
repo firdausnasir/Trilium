@@ -41,7 +41,7 @@ export default function MobileDetailMenu() {
     }
 
     return (
-        <div style={{ contain: "none" }}>
+        <div className="mobile-detail-menu">
             {note ? (
                 <NoteContextMenu
                     dropdownRef={dropdownRef}

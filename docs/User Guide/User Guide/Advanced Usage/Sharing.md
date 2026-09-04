@@ -103,7 +103,7 @@ While the sharing feature is powerful, it has some limitations:
 *   **Code Notes**: No syntax highlighting.
 *   **Static Note Tree**
 *   **Protected Notes**: Cannot be shared.
-*   **Include Notes**: Not supported.
+*   **Include Notes**: Included notes must also be shared.
 
 Some of these limitations may be addressed in future updates.
 
@@ -113,10 +113,10 @@ To use the sharing feature, you must have a <a class="reference-link" href="../
 
 ## Sharing a note
 
-1.  **Enable Sharing**: To share a note, toggle the `Shared` switch within the note's interface. Once sharing is enabled, an URL will appear, which you can click to access the shared note.
+1.  **Enable Sharing**: In the <a class="reference-link" href="../Basic%20Concepts%20and%20Features/UI%20Elements/New%20Layout.md">New Layout</a>, open <a class="reference-link" href="../Basic%20Concepts%20and%20Features/UI%20Elements/Note%20buttons.md">Note actions</a> and turn on _Shared_. In the Classic layout, open _Basic Properties_ and use the _Shared_ switch.
     
     ![Share Note](Sharing_share-single-note.png)
-2.  **Access the Shared Note**: The link provided will open the note in your browser. If your server is not configured with a public IP, the URL will refer to `localhost (127.0.0.1)`.
+2.  **Access the Shared Note**: In the New Layout, use the share badge beside the note title to copy the URL or open the public page. In the Classic layout, use the URL shown in Basic Properties. If your server is not configured with a public address, the URL will refer to `localhost (127.0.0.1)`.
 
 ## Sharing a note subtree
 
@@ -291,7 +291,7 @@ The URL must be absolute and include the scheme (e.g. `https://`).
 
 ### Customizing logo
 
-It's possible to adjust the logo which is displayed on the top-left of the left pane.
+It is possible to adjust the logo displayed in the public page masthead.
 
 | Attribute | Description |
 | --- | --- |
@@ -308,7 +308,3 @@ It's possible to adjust the logo which is displayed on the top-left of the left 
 | `#shareOpenGraphURL` | This adjusts the `og:url` and `twitter:url` meta-properties. |
 | `#shareOpenGraphDomain` | Adjusts the `twitter:domain` meta-property. |
 | `#shareOpenGraphImage`   <br>`~shareOpenGraphImage` | Can be either a label, case in which the value is passed on as-is, or it can be a relation to an image <a class="reference-link" href="../Note%20Types/File.md">File</a>. This controls the `og:image` meta-property. |
-
-## Credits
-
-Since v0.95.0, a new theme was introduced (and enabled by default) which greatly improves the visual aspect of the Share feature, as well as its functionality (such as mobile support, dark/light mode, collapsible tree, etc.). This theme is an adaptation of the [Trilium Rocks!](https://github.com/zerebos/trilium.rocks) by [zerebos](https://github.com/zerebos).
